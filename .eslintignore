@@ -1,8 +1,8 @@
 /lambda/
 /scripts
-/config
+# /config
 .history
 public
 dist
 .umi
-mock
+# mock

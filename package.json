@@ -1,8 +1,8 @@
 {
-  "name": "ant-design-pro",
-  "version": "5.0.0-beta.2",
+  "name": "bmap-routing",
+  "version": "1.0.0",
   "private": true,
-  "description": "An out-of-box UI solution for enterprise applications",
+  "description": "bmap-routing",
   "scripts": {
     "analyze": "cross-env ANALYZE=1 umi build",
     "build": "umi build",
@@ -58,6 +58,7 @@
     "omit.js": "^2.0.2",
     "qs": "^6.9.0",
     "react": "^17.0.0",
+    "react-bmapgl": "^0.1.3",
     "react-dev-inspector": "^1.1.1",
     "react-dom": "^17.0.0",
     "react-helmet-async": "^1.0.4",
@@ -66,6 +67,7 @@
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^2.0.2",
+    "@types/bmapgl": "0.0.3",
     "@types/classnames": "^2.2.7",
     "@types/express": "^4.17.0",
     "@types/history": "^4.7.2",

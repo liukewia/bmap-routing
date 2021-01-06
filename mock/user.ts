@@ -9,7 +9,7 @@ const waitTime = (time: number = 100) => {
 };
 
 async function getFakeCaptcha(req: Request, res: Response) {
-  await waitTime(2000);
+  await waitTime(1000);
   return res.json('captcha-xxx');
 }
 
@@ -42,7 +42,7 @@ export default {
       return;
     }
     res.send({
-      name: 'Serati Ma',
+      name: 'Admin',
       avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
       userid: '00000001',
       email: 'antdesign@alipay.com',
@@ -111,13 +111,13 @@ export default {
       key: '3',
       name: 'Joe Black',
       age: 32,
-      address: 'Sidney No. 1 Lake Park',
+      address: 'Sydney No. 1 Lake Park',
     },
   ],
   'POST /api/login/account': async (req: Request, res: Response) => {
     const { password, username, type } = req.body;
-    await waitTime(2000);
-    if (password === 'ant.design' && username === 'admin') {
+    await waitTime(1000);
+    if (password === 'root' && username === 'admin') {
       res.send({
         status: 'ok',
         type,
@@ -126,7 +126,7 @@ export default {
       access = 'admin';
       return;
     }
-    if (password === 'ant.design' && username === 'user') {
+    if (password === 'root' && username === 'user') {
       res.send({
         status: 'ok',
         type,

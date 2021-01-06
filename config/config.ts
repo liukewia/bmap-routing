@@ -13,13 +13,12 @@ export default defineConfig({
     hmr: true,
   },
   layout: {
-    name: 'Ant Design Pro',
+    name: 'bmap-routing',
     locale: true,
-    siderWidth: 208,
+    siderWidth: 130,
     ...defaultSettings,
   },
   locale: {
-    // default zh-CN
     default: 'zh-CN',
     antd: true,
     // default true, when it is true, will use `navigator.language` overwrite default
