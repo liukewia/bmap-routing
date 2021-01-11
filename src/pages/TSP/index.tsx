@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Card, Steps } from 'antd';
+import { Row, Col, Card, Steps } from 'antd';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import StepBaseForm from './components/StepBaseForm';
 import StepConfirmForm from './components/StepConfirmForm';
 import StepResult from './components/StepResult';
+import { Map, Marker, NavigationControl, InfoWindow, MapApiLoaderHOC } from 'react-bmapgl';
 import type { StepComponentTypeProps, StepDataType, CurrentTypes } from './data';
 import styles from './style.less';
 
@@ -34,19 +35,41 @@ const StepForm: React.FC = () => {
   }, [current]);
 
   return (
-    <PageHeaderWrapper content="求解旅行商问题(TSP)">
-      <Card bordered={false}>
-        <>
-          <Steps size="small" current={step} className={styles.steps}>
-            <Step title="填写转账信息" />
-            <Step title="确认转账信息" />
-            <Step title="完成" />
-          </Steps>
-          {component}
-        </>
-      </Card>
-    </PageHeaderWrapper>
+    <>
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <PageHeaderWrapper content="求解单车辆路径问题 / 旅行商问题 (TSP)" />
+        </Col>
+      </Row>
+      <Row gutter={[16, 16]}>
+        <Col span={10}>
+          <Card>
+            <>
+              <Steps size="small" current={step} className={styles.steps}>
+                <Step title="算法" />
+                <Step title="选点" />
+                <Step title="完成" />
+              </Steps>
+              {component}
+            </>
+          </Card>
+        </Col>
+        <Col span={14}>
+          <Card>
+            <Map center={new BMapGL.Point(116.4, 39.91)} zoom={11} onClick={(e) => console.log(e)}>
+              <Marker position={new BMapGL.Point(116.4, 39.91)} icon="start" />
+              <NavigationControl />
+              <InfoWindow position={new BMapGL.Point(116.4, 39.91)} title="标题" text="内容" />
+            </Map>
+          </Card>
+        </Col>
+      </Row>
+      <Row gutter={[16, 16]}>
+        <Col span={12} />
+        <Col span={12} />
+      </Row>
+    </>
   );
 };
 
-export default StepForm;
+export default MapApiLoaderHOC({ ak: 'OalRnqTPhFKA9F4CwPQwCtprspgDqGG3' })(StepForm);

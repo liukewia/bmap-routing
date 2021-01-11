@@ -14,15 +14,15 @@ export default defineConfig({
   },
   layout: {
     name: 'bmap-routing',
-    locale: true,
+    locale: false,
     siderWidth: 130,
     ...defaultSettings,
   },
   locale: {
-    default: 'zh-CN',
-    antd: true,
+    // default: 'zh-CN',
+    // antd: true,
     // default true, when it is true, will use `navigator.language` overwrite default
-    baseNavigator: true,
+    // baseNavigator: true,
   },
   dynamicImport: {
     loading: '@ant-design/pro-layout/es/PageLoading',
