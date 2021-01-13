@@ -5,14 +5,14 @@ import Step1Form from './components/Step1Form';
 import Step2Form from './components/Step2Form';
 import StepResult from './components/StepResult';
 import { Map, Marker, NavigationControl, InfoWindow, MapApiLoaderHOC } from 'react-bmapgl';
-import type { StepComponentTypeProps, StepDataType, CurrentStepType } from './data';
+import type { StepComponentTypeProps, CurrentStepType, algorithmDataType } from './data';
 import styles from './style.less';
 
 const { Step } = Steps;
 
 const StepForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<CurrentStepType>('step1');
-  const [stepData, setStepData] = useState<StepDataType>({
+  const [algorithmData, setAlgorithmData] = useState<algorithmDataType>({
     algorithm: 'SA',
     initialTemp: 1e3,
     finalTemp: 1e-3,
@@ -23,8 +23,8 @@ const StepForm: React.FC = () => {
   const stepComponentProps: StepComponentTypeProps = {
     currentStep,
     setCurrentStep,
-    stepData,
-    setStepData,
+    algorithmData,
+    setAlgorithmData,
   };
 
   const { step, component } = useMemo(() => {
@@ -52,7 +52,7 @@ const StepForm: React.FC = () => {
         <Col span={10}>
           <Card>
             <>
-              <Steps size="small" currentStep={step} className={styles.steps}>
+              <Steps size="small" current={step} className={styles.steps}>
                 <Step title="算法" />
                 <Step title="选点" />
                 <Step title="计算" />

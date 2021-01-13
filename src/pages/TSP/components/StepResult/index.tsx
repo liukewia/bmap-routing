@@ -4,7 +4,7 @@ import type { StepComponentTypeProps } from '../../data';
 import styles from './index.less';
 
 const Step3: React.FC<StepComponentTypeProps> = (props) => {
-  const { setCurrentStep, stepData: data } = props;
+  const { setCurrentStep, algorithmData: data } = props;
 
   if (!data) {
     return null;

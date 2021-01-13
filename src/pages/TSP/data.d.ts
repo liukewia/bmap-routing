@@ -1,4 +1,4 @@
-export type StepDataType = {
+export type algorithmDataType = {
   algorithm: string;
   initialTemp: number;
   finalTemp: number;
@@ -10,7 +10,7 @@ export type CurrentStepType = 'step1' | 'step2' | 'result';
 
 export type StepComponentTypeProps = {
   currentStep: CurrentStepType;
-  stepData: StepDataType;
+  algorithmData: algorithmDataType;
   setCurrentStep: React.Dispatch<React.SetStateAction<CurrentStepType>>;
-  setStepData: React.Dispatch<React.SetStateAction<StepDataType>>;
+  setAlgorithmData: React.Dispatch<React.SetStateAction<algorithmDataType>>;
 };

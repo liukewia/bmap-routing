@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button, Divider, Select, InputNumber } from 'antd';
+import { Form, Button, Divider, Select, InputNumber, message } from 'antd';
 import type { StepComponentTypeProps } from '../../data';
 import styles from './index.less';
 
@@ -15,27 +15,47 @@ const formItemLayout = {
 };
 
 const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
-  const { setStepData, setCurrentStep, stepData: data } = props;
-  const { algorithm, initialTemp, finalTemp, coolingRate, chainLength } = data;
+  const { setAlgorithmData, setCurrentStep, algorithmData } = props;
+  const { algorithm, initialTemp, finalTemp, coolingRate, chainLength } = algorithmData;
 
-  const [algorithmSelected, reselectAlgorithm] = useState(algorithm);
+  const [algorithmSelected, reselectAlgorithm] = useState<string>(algorithm);
 
   const [form] = Form.useForm();
 
-  if (!data) {
+  if (!algorithmData) {
     return null;
   }
 
   // will be going to step 2
   const onValidateForm = async () => {
     const values = await form.validateFields();
-    console.log(values);
-    setStepData({ ...data, ...values });
+    // console.log(values);
+    // console.log(values.finalTemp, finalTemp);
+    // validate again before entering step 2
+    if (algorithmSelected === 'SA') {
+      if (
+        values.initialTemp <= 0 ||
+        values.finalTemp <= 0 ||
+        values.initialTemp <= values.finalTemp ||
+        values.coolingRate <= 0 ||
+        values.coolingRate >= 1 ||
+        values.chainLength <= 1
+      ) {
+        message.error(`某些参数不合法！`);
+        return;
+      }
+    } else {
+      message.error(`选中算法不合法！`);
+      return;
+    }
+    setAlgorithmData({ ...algorithmData, ...values });
     // TODO step3 计算后，可通过set TSP页面的State，传step3界面实时计算结果至father comp,再从props传给 1、3、4 child comp.
     setCurrentStep('step2');
   };
 
-  const algorithmSelectorHandler = (value: string) => reselectAlgorithm(value);
+  const algorithmSelectorHandler = (value: string) => {
+    reselectAlgorithm(value);
+  };
 
   const renderSwitch = (algorithmChoice: string) => {
     switch (algorithmChoice) {
@@ -48,6 +68,7 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
               rules={[{ required: true, message: '请输入初始温度' }]}
             >
               <InputNumber
+                // @ts-ignore
                 initialValues={initialTemp}
                 min={1}
                 formatter={(value) => `${value}  'C`}
@@ -60,6 +81,7 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
               rules={[{ required: true, message: '请输入终止温度' }]}
             >
               <InputNumber
+                // @ts-ignore
                 initialValues={finalTemp}
                 min={1e-9}
                 step={1}
@@ -72,14 +94,26 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
               name="coolingRate"
               rules={[{ required: true, message: '请输入降温速率' }]}
             >
-              <InputNumber initialValues={coolingRate} min={0} max={0.99} step={0.1} />
+              <InputNumber
+                // @ts-ignore
+                initialValues={coolingRate}
+                min={0}
+                max={0.99}
+                step={0.1}
+              />
             </Form.Item>
             <Form.Item
               label="Markov 链长"
               name="chainLength"
               rules={[{ required: true, message: '请输入 Markov 链长' }]}
             >
-              <InputNumber initialValues={chainLength} min={1} step={10} />
+              <InputNumber
+                // @ts-ignore
+                initialValues={chainLength}
+                min={1}
+                max={500}
+                step={10}
+              />
             </Form.Item>
           </>
         );
@@ -90,7 +124,10 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
             name="param"
             rules={[{ required: true, message: '请输入' }]}
           >
-            <InputNumber disabled={true} />
+            <InputNumber
+              // @ts-ignore
+              initialValues={1}
+            />
           </Form.Item>
         );
       default:
@@ -106,7 +143,7 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
         layout="horizontal"
         className={styles.stepForm}
         hideRequiredMark
-        initialValues={data}
+        initialValues={algorithmData}
       >
         <Form.Item
           label="算法选择"

@@ -17,12 +17,12 @@ const formItemLayout = {
 const Step2: React.FC<StepComponentTypeProps> = (props) => {
   const [form] = Form.useForm();
 
-  const { setStepData, setCurrentStep, stepData: data } = props;
+  const { setAlgorithmData, setCurrentStep, algorithmData: data } = props;
 
   const { loading: submitting, run } = useRequest(fakeSubmitForm, {
     manual: true,
     onSuccess: (_, params) => {
-      setStepData(params[0]);
+      setAlgorithmData(params[0]);
       setCurrentStep('result');
     },
   });
@@ -32,7 +32,7 @@ const Step2: React.FC<StepComponentTypeProps> = (props) => {
   const { validateFields, getFieldsValue } = form;
   const onPrev = () => {
     const values = getFieldsValue();
-    setStepData({ ...data, ...values });
+    setAlgorithmData({ ...data, ...values });
     setCurrentStep('step1');
   };
   const onValidateForm = async () => {
