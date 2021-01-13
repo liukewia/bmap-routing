@@ -1,15 +1,16 @@
 export type StepDataType = {
-  payAccount: string;
-  receiverAccount: string;
-  receiverName: string;
-  amount: string;
+  algorithm: string;
+  initialTemp: number;
+  finalTemp: number;
+  coolingRate: number;
+  chainLength: number;
 };
 
-export type CurrentTypes = 'base' | 'confirm' | 'result';
+export type CurrentStepType = 'step1' | 'step2' | 'result';
 
 export type StepComponentTypeProps = {
-  current: CurrentTypes;
+  currentStep: CurrentStepType;
   stepData: StepDataType;
-  setCurrent: React.Dispatch<React.SetStateAction<CurrentTypes>>;
+  setCurrentStep: React.Dispatch<React.SetStateAction<CurrentStepType>>;
   setStepData: React.Dispatch<React.SetStateAction<StepDataType>>;
 };

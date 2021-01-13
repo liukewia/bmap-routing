@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, Descriptions, Divider, Statistic, Input } from 'antd';
+import { Form, Button, Divider, Input, Space } from 'antd';
 import { useRequest } from 'umi';
 import { fakeSubmitForm } from '../../service';
 import type { StepComponentTypeProps } from '../../data';
@@ -17,13 +17,13 @@ const formItemLayout = {
 const Step2: React.FC<StepComponentTypeProps> = (props) => {
   const [form] = Form.useForm();
 
-  const { setStepData, setCurrent, stepData: data } = props;
+  const { setStepData, setCurrentStep, stepData: data } = props;
 
   const { loading: submitting, run } = useRequest(fakeSubmitForm, {
     manual: true,
     onSuccess: (_, params) => {
       setStepData(params[0]);
-      setCurrent('result');
+      setCurrentStep('result');
     },
   });
   if (!data) {
@@ -33,14 +33,13 @@ const Step2: React.FC<StepComponentTypeProps> = (props) => {
   const onPrev = () => {
     const values = getFieldsValue();
     setStepData({ ...data, ...values });
-    setCurrent('base');
+    setCurrentStep('step1');
   };
   const onValidateForm = async () => {
     const values = await validateFields();
     run({ ...data, ...values });
   };
 
-  const { payAccount, receiverAccount, receiverName, amount } = data;
   return (
     <Form
       {...formItemLayout}
@@ -55,14 +54,6 @@ const Step2: React.FC<StepComponentTypeProps> = (props) => {
         message="确认转账后，资金将直接打入对方账户，无法退回。"
         style={{ marginBottom: 24 }}
       /> */}
-      <Descriptions column={1}>
-        <Descriptions.Item label="付款账户"> {payAccount}</Descriptions.Item>
-        <Descriptions.Item label="收款账户"> {receiverAccount}</Descriptions.Item>
-        <Descriptions.Item label="收款人姓名"> {receiverName}</Descriptions.Item>
-        <Descriptions.Item label="转账金额">
-          <Statistic value={amount} suffix="元" />
-        </Descriptions.Item>
-      </Descriptions>
       <Divider style={{ margin: '24px 0' }} />
       <Form.Item
         label="支付密码"
@@ -82,15 +73,15 @@ const Step2: React.FC<StepComponentTypeProps> = (props) => {
           },
         }}
       >
-        <Button type="primary" onClick={onValidateForm} loading={submitting}>
-          提交
-        </Button>
-        <Button onClick={onPrev} style={{ marginLeft: 8 }}>
-          上一步
-        </Button>
-        <Button type="link" htmlType="button">
-          Fill
-        </Button>
+        <Space>
+          <Button onClick={onPrev}>上一步</Button>
+          <Button type="primary" onClick={onValidateForm} loading={submitting}>
+            提交
+          </Button>
+          <Button type="link" htmlType="button">
+            Fill
+          </Button>
+        </Space>
       </Form.Item>
     </Form>
   );

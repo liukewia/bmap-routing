@@ -1,38 +1,45 @@
 import React, { useState, useMemo } from 'react';
 import { Row, Col, Card, Steps } from 'antd';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import StepBaseForm from './components/StepBaseForm';
-import StepConfirmForm from './components/StepConfirmForm';
+import Step1Form from './components/Step1Form';
+import Step2Form from './components/Step2Form';
 import StepResult from './components/StepResult';
 import { Map, Marker, NavigationControl, InfoWindow, MapApiLoaderHOC } from 'react-bmapgl';
-import type { StepComponentTypeProps, StepDataType, CurrentTypes } from './data';
+import type { StepComponentTypeProps, StepDataType, CurrentStepType } from './data';
 import styles from './style.less';
 
 const { Step } = Steps;
 
 const StepForm: React.FC = () => {
-  const [current, setCurrent] = useState<CurrentTypes>('base');
+  const [currentStep, setCurrentStep] = useState<CurrentStepType>('step1');
   const [stepData, setStepData] = useState<StepDataType>({
-    payAccount: 'ant-design@alipay.com',
-    receiverAccount: 'test@example.com',
-    receiverName: 'Alex',
-    amount: '500',
+    algorithm: 'SA',
+    initialTemp: 1e3,
+    finalTemp: 1e-3,
+    coolingRate: 0.9,
+    chainLength: 10,
   });
 
-  const stepComponentProps: StepComponentTypeProps = { current, setCurrent, stepData, setStepData };
+  const stepComponentProps: StepComponentTypeProps = {
+    currentStep,
+    setCurrentStep,
+    stepData,
+    setStepData,
+  };
 
   const { step, component } = useMemo(() => {
-    const getCurrentStepAndComponent = (curr = 'base') => {
+    const getCurrentStepAndComponent = (curr = 'step1') => {
       const stepAndComponent = {
-        base: { step: 0, component: <StepBaseForm {...stepComponentProps} /> },
-        confirm: { step: 1, component: <StepConfirmForm {...stepComponentProps} /> },
+        // spreading syntax
+        step1: { step: 0, component: <Step1Form {...stepComponentProps} /> },
+        step2: { step: 1, component: <Step2Form {...stepComponentProps} /> },
         result: { step: 2, component: <StepResult {...stepComponentProps} /> },
       };
       return stepAndComponent[curr];
     };
 
-    return getCurrentStepAndComponent(current);
-  }, [current]);
+    return getCurrentStepAndComponent(currentStep);
+  }, [currentStep]);
 
   return (
     <>
@@ -45,10 +52,10 @@ const StepForm: React.FC = () => {
         <Col span={10}>
           <Card>
             <>
-              <Steps size="small" current={step} className={styles.steps}>
+              <Steps size="small" currentStep={step} className={styles.steps}>
                 <Step title="算法" />
                 <Step title="选点" />
-                <Step title="完成" />
+                <Step title="计算" />
               </Steps>
               {component}
             </>
@@ -56,7 +63,13 @@ const StepForm: React.FC = () => {
         </Col>
         <Col span={14}>
           <Card>
-            <Map center={new BMapGL.Point(116.4, 39.91)} zoom={11} onClick={(e) => console.log(e)}>
+            <Map
+              center={new BMapGL.Point(116.4, 39.91)}
+              zoom={11}
+              onClick={(e) => console.log(e)}
+              enableDragging={true}
+              enableScrollWheelZoom={true}
+            >
               <Marker position={new BMapGL.Point(116.4, 39.91)} icon="start" />
               <NavigationControl />
               <InfoWindow position={new BMapGL.Point(116.4, 39.91)} title="标题" text="内容" />
