@@ -7,18 +7,18 @@ const { Option } = Select;
 
 const formItemLayout = {
   labelCol: {
-    span: 10,
+    span: 8,
   },
   wrapperCol: {
-    span: 10,
+    span: 12,
   },
 };
 
 const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
-  const { setAlgorithmData, setCurrentStep, algorithmData } = props;
+  const { algorithmData, setAlgorithmData, setCurrentStep } = props;
   const { algorithm, initialTemp, finalTemp, coolingRate, chainLength } = algorithmData;
 
-  const [algorithmSelected, reselectAlgorithm] = useState<string>(algorithm);
+  const [algorithmSelected, selectAlgorithm] = useState<string>(algorithm);
 
   const [form] = Form.useForm();
 
@@ -26,12 +26,12 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
     return null;
   }
 
-  // will be going to step 2
+  // will go to step 2
   const onValidateForm = async () => {
     const values = await form.validateFields();
     // console.log(values);
     // console.log(values.finalTemp, finalTemp);
-    // validate again before entering step 2
+    // validate algorithm logic again before entering step 2
     if (algorithmSelected === 'SA') {
       if (
         values.initialTemp <= 0 ||
@@ -41,7 +41,7 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
         values.coolingRate >= 1 ||
         values.chainLength <= 1
       ) {
-        message.error(`某些参数不合法！`);
+        message.error(`算法的传入参数或其组合不合法！`);
         return;
       }
     } else {
@@ -54,7 +54,7 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
   };
 
   const algorithmSelectorHandler = (value: string) => {
-    reselectAlgorithm(value);
+    selectAlgorithm(value);
   };
 
   const renderSwitch = (algorithmChoice: string) => {
@@ -68,9 +68,11 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
               rules={[{ required: true, message: '请输入初始温度' }]}
             >
               <InputNumber
+                className={styles.numInput}
                 // @ts-ignore
                 initialValues={initialTemp}
                 min={1}
+                step={1000}
                 formatter={(value) => `${value}  'C`}
                 parser={(value) => (value ? value.replace("  'C", '') : initialTemp)}
               />
@@ -81,6 +83,7 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
               rules={[{ required: true, message: '请输入终止温度' }]}
             >
               <InputNumber
+                className={styles.numInput}
                 // @ts-ignore
                 initialValues={finalTemp}
                 min={1e-9}
@@ -95,6 +98,7 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
               rules={[{ required: true, message: '请输入降温速率' }]}
             >
               <InputNumber
+                className={styles.numInput}
                 // @ts-ignore
                 initialValues={coolingRate}
                 min={0}
@@ -108,6 +112,7 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
               rules={[{ required: true, message: '请输入 Markov 链长' }]}
             >
               <InputNumber
+                className={styles.numInput}
                 // @ts-ignore
                 initialValues={chainLength}
                 min={1}
@@ -136,42 +141,41 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
   };
 
   return (
-    <>
-      <Form
-        {...formItemLayout}
-        form={form}
-        layout="horizontal"
-        className={styles.stepForm}
-        hideRequiredMark
-        initialValues={algorithmData}
+    <Form
+      {...formItemLayout}
+      form={form}
+      layout="horizontal"
+      className={styles.stepForm}
+      hideRequiredMark
+      initialValues={algorithmData}
+    >
+      <Divider />
+      <Form.Item
+        label="算法选择"
+        name="algorithm"
+        rules={[{ required: true, message: '请选择算法' }]}
       >
-        <Form.Item
-          label="算法选择"
-          name="algorithm"
-          rules={[{ required: true, message: '请选择算法' }]}
-        >
-          <Select placeholder="请选择" onChange={algorithmSelectorHandler}>
-            <Option value="SA">模拟退火算法</Option>
-            <Option value="GA">遗传算法</Option>
-          </Select>
-        </Form.Item>
-        <Divider />
-        {renderSwitch(algorithmSelected)}
-        <Form.Item
-          wrapperCol={{
-            xs: { span: 24, offset: 0 },
-            sm: {
-              span: formItemLayout.wrapperCol.span,
-              offset: formItemLayout.labelCol.span,
-            },
-          }}
-        >
-          <Button type="primary" onClick={onValidateForm}>
-            下一步
-          </Button>
-        </Form.Item>
-      </Form>
-    </>
+        <Select placeholder="请选择" onChange={algorithmSelectorHandler}>
+          <Option value="SA">模拟退火算法</Option>
+          <Option value="GA">遗传算法</Option>
+        </Select>
+      </Form.Item>
+      <Divider />
+      {renderSwitch(algorithmSelected)}
+      <Form.Item
+        wrapperCol={{
+          xs: { span: 24, offset: 0 },
+          sm: {
+            span: formItemLayout.wrapperCol.span,
+            offset: formItemLayout.labelCol.span,
+          },
+        }}
+      >
+        <Button type="primary" onClick={onValidateForm}>
+          下一步
+        </Button>
+      </Form.Item>
+    </Form>
   );
 };
 

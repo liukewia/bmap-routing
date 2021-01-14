@@ -4,7 +4,7 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import Step1Form from './components/Step1Form';
 import Step2Form from './components/Step2Form';
 import StepResult from './components/StepResult';
-import { Map, Marker, NavigationControl, InfoWindow, MapApiLoaderHOC } from 'react-bmapgl';
+import BaiduMapComponent from '@/components/BaiduMap';
 import type { StepComponentTypeProps, CurrentStepType, algorithmDataType } from './data';
 import styles from './style.less';
 
@@ -21,10 +21,10 @@ const StepForm: React.FC = () => {
   });
 
   const stepComponentProps: StepComponentTypeProps = {
-    currentStep,
-    setCurrentStep,
     algorithmData,
     setAlgorithmData,
+    currentStep,
+    setCurrentStep,
   };
 
   const { step, component } = useMemo(() => {
@@ -63,17 +63,7 @@ const StepForm: React.FC = () => {
         </Col>
         <Col span={14}>
           <Card>
-            <Map
-              center={new BMapGL.Point(116.4, 39.91)}
-              zoom={11}
-              onClick={(e) => console.log(e)}
-              enableDragging={true}
-              enableScrollWheelZoom={true}
-            >
-              <Marker position={new BMapGL.Point(116.4, 39.91)} icon="start" />
-              <NavigationControl />
-              <InfoWindow position={new BMapGL.Point(116.4, 39.91)} title="标题" text="内容" />
-            </Map>
+            <BaiduMapComponent />
           </Card>
         </Col>
       </Row>
@@ -85,4 +75,4 @@ const StepForm: React.FC = () => {
   );
 };
 
-export default MapApiLoaderHOC({ ak: 'OalRnqTPhFKA9F4CwPQwCtprspgDqGG3' })(StepForm);
+export default StepForm;
