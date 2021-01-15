@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Divider, Select, InputNumber, message } from 'antd';
-import type { StepComponentTypeProps } from '../../data';
+import type { StepAndComponentPropsType } from '../../data';
 import styles from './index.less';
 
 const { Option } = Select;
@@ -14,7 +14,7 @@ const formItemLayout = {
   },
 };
 
-const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
+const Step1Form: React.FC<StepAndComponentPropsType> = (props) => {
   const { algorithmData, setAlgorithmData, setCurrentStep } = props;
   const { algorithm, initialTemp, finalTemp, coolingRate, chainLength } = algorithmData;
 
@@ -69,7 +69,6 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
             >
               <InputNumber
                 className={styles.numInput}
-                // @ts-ignore
                 initialValues={initialTemp}
                 min={1}
                 step={1000}
@@ -84,7 +83,6 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
             >
               <InputNumber
                 className={styles.numInput}
-                // @ts-ignore
                 initialValues={finalTemp}
                 min={1e-9}
                 step={1}
@@ -99,7 +97,6 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
             >
               <InputNumber
                 className={styles.numInput}
-                // @ts-ignore
                 initialValues={coolingRate}
                 min={0}
                 max={0.99}
@@ -113,7 +110,6 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
             >
               <InputNumber
                 className={styles.numInput}
-                // @ts-ignore
                 initialValues={chainLength}
                 min={1}
                 max={500}
@@ -130,7 +126,6 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
             rules={[{ required: true, message: '请输入' }]}
           >
             <InputNumber
-              // @ts-ignore
               initialValues={1}
             />
           </Form.Item>
@@ -160,7 +155,6 @@ const Step1Form: React.FC<StepComponentTypeProps> = (props) => {
           <Option value="GA">遗传算法</Option>
         </Select>
       </Form.Item>
-      <Divider />
       {renderSwitch(algorithmSelected)}
       <Form.Item
         wrapperCol={{

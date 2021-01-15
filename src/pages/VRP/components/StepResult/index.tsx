@@ -1,9 +1,9 @@
 import { Button, Result } from 'antd';
 import React from 'react';
-import type { StepComponentTypeProps } from '../../data';
+import type { StepAndComponentPropsType } from '../../data';
 import styles from './index.less';
 
-const Step3: React.FC<StepComponentTypeProps> = (props) => {
+const Step3: React.FC<StepAndComponentPropsType> = (props) => {
   const { setCurrentStep, algorithmData: data } = props;
 
   if (!data) {

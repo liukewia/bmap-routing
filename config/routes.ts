@@ -29,13 +29,13 @@
     name: '单车辆路径问题（TSP）',
     icon: 'nodeIndex',
     path: '/TSP',
-    component: './TSP',
+    component: './VRP',
   },
   {
     name: '多车辆路径问题（VRP）',
     icon: 'nodeIndex',
     path: '/VRP',
-    component: './TSP',
+    component: './VRP',
   },
   {
     component: './404',

@@ -1,10 +1,8 @@
-export const defaultSearchOption = {
-  onSearchComplete: (results: any) => {
-    return results;
-  },
-};
 
-export async function localSearch(clickEvent, defaultCity, POI, options) {
+
+
+export function localSearch(clickEvent, defaultCity, POI, options) {
+  // the BMapGL.LocalSearch newed will be executed in the scope having AK code.
   const newlocalSearch = new BMapGL.LocalSearch(defaultCity, options);
-  await newlocalSearch.search(POI);
+  newlocalSearch.search(POI);
 }

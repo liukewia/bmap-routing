@@ -11,15 +11,6 @@
     "gh-pages": "gh-pages -d dist",
     "i18n-remove": "pro i18n-remove --locale=zh-CN --write",
     "postinstall": "umi g tmp",
-    "lint": "umi g tmp && npm run lint:js && npm run lint:style && npm run lint:prettier",
-    "lint-staged": "lint-staged",
-    "lint-staged:js": "eslint --ext .js,.jsx,.ts,.tsx ",
-    "lint:fix": "eslint --fix --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src && npm run lint:style",
-    "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
-    "lint:prettier": "prettier --check \"src/**/*\" --end-of-line auto",
-    "lint:style": "stylelint --fix \"src/**/*.less\" --syntax less",
-    "precommit": "lint-staged",
-    "prettier": "prettier -c --write \"src/**/*\"",
     "start": "umi dev",
     "start:dev": "cross-env REACT_APP_ENV=dev MOCK=none umi dev",
     "start:no-mock": "cross-env MOCK=none umi dev",
@@ -32,13 +23,6 @@
     "test:component": "umi test ./src/components",
     "tsc": "tsc --noEmit"
   },
-  "lint-staged": {
-    "**/*.less": "stylelint --syntax less",
-    "**/*.{js,jsx,ts,tsx}": "npm run lint-staged:js",
-    "**/*.{js,jsx,tsx,ts,less,md,json}": [
-      "prettier --write"
-    ]
-  },
   "browserslist": [
     "> 1%",
     "last 2 versions",
@@ -50,6 +34,7 @@
     "@ant-design/pro-form": "^1.3.0",
     "@ant-design/pro-layout": "^6.9.0",
     "@ant-design/pro-table": "^2.17.0",
+    "@ant-design/pro-card": "^1.9.11",
     "@umijs/route-utils": "^1.0.33",
     "antd": "^4.9.4",
     "classnames": "^2.2.6",

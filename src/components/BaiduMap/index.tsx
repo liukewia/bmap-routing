@@ -2,19 +2,19 @@ import {
   Map,
   Marker,
   NavigationControl,
-  // InfoWindow,
   MapApiLoaderHOC,
 } from 'react-bmapgl';
-import {
-  localSearch,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  defaultSearchOption,
-} from '@/services/bmap-service';
+import { localSearch } from '@/services/bmap-service';
 
 const BaiduMap = () => {
-  const mapClickHandler = async (clickEvent, defaultCity, POI, options) => {
-    await localSearch(clickEvent, defaultCity, POI, options);
-    // console.log(results);
+
+  const searchResultHandler = (results: any) => {
+    // cannot return results, can only handle them inside this scope.
+    console.log(results);
+  }
+
+  const mapClickHandler = (clickEvent, defaultCity, POI, options) => {
+    localSearch(clickEvent, defaultCity, POI, options);
   };
 
   return (
@@ -23,13 +23,11 @@ const BaiduMap = () => {
       zoom={11}
       onClick={(e) =>
         mapClickHandler(e, '北京', '腾讯北京总部大楼', {
-          onSearchComplete: (results: any) => {
-            console.log(results);
-          },
+          onSearchComplete: searchResultHandler,
         })
       }
       // enableDragging={true}
-      enableScrollWheelZoom={true}
+      // enableScrollWheelZoom={true}
     >
       <Marker position={new BMapGL.Point(116.4, 39.91)} icon="start" />
       <NavigationControl />
@@ -37,6 +35,4 @@ const BaiduMap = () => {
   );
 };
 
-export default MapApiLoaderHOC({
-  ak: 'OalRnqTPhFKA9F4CwPQwCtprspgDqGG3',
-})(BaiduMap);
+export default MapApiLoaderHOC({ ak: 'OalRnqTPhFKA9F4CwPQwCtprspgDqGG3' })(BaiduMap);
