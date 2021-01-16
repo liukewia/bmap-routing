@@ -45,7 +45,7 @@ const Step1Form: React.FC<StepAndComponentPropsType> = (props) => {
         return;
       }
     } else {
-      message.error(`选中算法不合法！`);
+      message.error('选中算法没写');
       return;
     }
     setAlgorithmData({ ...algorithmData, ...values });
@@ -121,12 +121,13 @@ const Step1Form: React.FC<StepAndComponentPropsType> = (props) => {
       case 'GA':
         return (
           <Form.Item
-            label="演示参数随算法切换"
+            label="演示"
             name="param"
             rules={[{ required: true, message: '请输入' }]}
           >
             <InputNumber
-              initialValues={1}
+                className={styles.numInput}
+                initialValues={1}
             />
           </Form.Item>
         );

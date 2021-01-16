@@ -19,6 +19,7 @@ const BaiduMap = () => {
 
   return (
     <Map
+      style={{ height: 500 }}
       center={new BMapGL.Point(116.4, 39.91)}
       zoom={11}
       onClick={(e) =>

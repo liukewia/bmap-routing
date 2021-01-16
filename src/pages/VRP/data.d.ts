@@ -9,7 +9,7 @@ export type algorithmDataType = {
   chainLength: number;
 };
 
-export type POIType = {
+export type POIDataType = {
   name: string;
   uid: string;  // unique id
   lng: number;  // longitude
@@ -22,6 +22,6 @@ export type StepAndComponentPropsType = {
   setCurrentStep: React.Dispatch<React.SetStateAction<CurrentStepType>>;
   algorithmData: algorithmDataType;
   setAlgorithmData: React.Dispatch<React.SetStateAction<algorithmDataType>>;
-  POIs: POIType[];
-  setPOIs: React.Dispatch<React.SetStateAction<POIType[]>>;
+  POIData: POIDataType[];
+  setPOIData: React.Dispatch<React.SetStateAction<POIDataType[]>>;
 };

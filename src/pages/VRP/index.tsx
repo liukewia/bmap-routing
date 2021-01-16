@@ -8,7 +8,7 @@ import BaiduMap from '@/components/BaiduMap';
 import type {
   CurrentStepType,
   algorithmDataType,
-  POIType,
+  POIDataType,
   StepAndComponentPropsType,
 } from './data';
 import styles from './style.less';
@@ -24,23 +24,23 @@ const StepForm: React.FC = () => {
     coolingRate: 0.9,
     chainLength: 10,
   });
-  const [POIs, setPOIs] = useState<POIType[]>([]);
+  const [POIData, setPOIData] = useState<POIDataType[]>([]);
 
   const stepAndComponentProps: StepAndComponentPropsType = {
     currentStep,
     setCurrentStep,
     algorithmData,
     setAlgorithmData,
-    POIs,
-    setPOIs,
+    POIData,
+    setPOIData,
   };
 
   const { step, component } = useMemo(() => {
     const getCurrentStepAndComponent = (curr = 'step1') => {
       const stepAndComponent = {
-        // spreading syntax
         step1: {
           step: 0,
+          // spreading syntax with only one object can be spreaded
           component: <Step1Form {...stepAndComponentProps} />
         },
         step2: {
@@ -66,7 +66,7 @@ const StepForm: React.FC = () => {
         </Col>
       </Row>
       <Row gutter={[16, 16]}>
-        <Col span={12}>
+        <Col span={10}>
           <Card>
             <Steps size="small" current={step} className={styles.steps}>
               <Step title="算法" />
@@ -76,7 +76,7 @@ const StepForm: React.FC = () => {
             {component}
           </Card>
         </Col>
-        <Col span={12}>
+        <Col span={14}>
           <Card>
             <BaiduMap />
           </Card>

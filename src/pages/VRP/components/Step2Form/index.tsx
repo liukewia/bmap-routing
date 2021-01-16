@@ -1,77 +1,61 @@
 import React from 'react';
 import { Form, Button, Divider, Space } from 'antd';
 import EditableTable from "@/components/EditableTable";
-import EditableTablePro from "@/components/EditableTablePro";
-import { useRequest } from 'umi';
-import { fakeSubmitForm } from '../../service';
+import SearchInput from "@/components/SearchInput";
 import type { StepAndComponentPropsType } from '../../data';
-import styles from './index.less';
 
-// const formItemLayout = {
-//   labelCol: {
-//     span: 5,
-//   },
-//   wrapperCol: {
-//     span: 19,
-//   },
-// };
 
 const Step2Form: React.FC<StepAndComponentPropsType> = (props) => {
   const [form] = Form.useForm();
 
-  const { algorithmData: data, setAlgorithmData, setCurrentStep } = props;
+  const { POIData, setPOIData, setCurrentStep } = props;
 
-  const { loading: submitting, run } = useRequest(fakeSubmitForm, {
-    manual: true,
-    onSuccess: (_, params) => {
-      setAlgorithmData(params[0]);
-      setCurrentStep('result');
-    },
-  });
-  if (!data) {
+  if (!POIData) {
     return null;
   }
+
   const { validateFields, getFieldsValue } = form;
+
   const onPrev = () => {
     const values = getFieldsValue();
-    setAlgorithmData({ ...data, ...values });
+    // although go back, save POI data.
+    setPOIData({ ...POIData, ...values });
     setCurrentStep('step1');
   };
+
   const onValidateForm = async () => {
     const values = await validateFields();
-    run({ ...data, ...values });
+
+    // is going to step 3, save POI data.
+    setPOIData({ ...POIData, ...values });
+    setCurrentStep('result');
   };
 
   return (
     <Form
-      // {...formItemLayout}
       form={form}
       layout="horizontal"
-      className={styles.stepForm}
     >
       <Divider />
-      <Form.Item
-        // label="支付密码"
-        // name="password"
-        // required={false}
-        // rules={[{ required: true, message: '需要支付密码才能进行支付' }]}
-      >
+      <Form.Item>
         <EditableTable />
-        {/* <EditableTablePro /> */}
       </Form.Item>
-      <Form.Item
-        style={{ marginBottom: 8 }}
-        // wrapperCol={{
-        //   xs: { span: 24, offset: 0 },
-        //   sm: {
-        //     span: formItemLayout.wrapperCol.span,
-        //     offset: formItemLayout.labelCol.span,
-        //   },
-        // }}
-      >
-        <Space>
-          <Button onClick={onPrev}>上一步</Button>
-          <Button type="primary" onClick={onValidateForm} loading={submitting}>
+      <Form.Item>
+        <SearchInput />
+      </Form.Item>
+      <Form.Item>
+        <Space
+          // TODO 如何居中
+          style={{ marginLeft: '150px' }}
+          size='large'
+        >
+          <Button onClick={onPrev}>
+            上一步
+          </Button>
+          <Button
+            type="primary"
+            onClick={onValidateForm}
+          >
             提交
           </Button>
         </Space>

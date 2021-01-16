@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { Table, Input, Button, Popconfirm, Form } from 'antd';
+import { Table, Select, InputNumber, Button, Form, message } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
+import { DeleteOutlined } from '@ant-design/icons';
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -8,7 +9,6 @@ type Item = {
   key: string;
   name: string;
   age: string;
-  address: string;
 }
 
 type EditableRowProps = {
@@ -45,14 +45,18 @@ const EditableCell: React.FC<EditableCellProps> = ({
   ...restProps
 }) => {
   const [editing, setEditing] = useState(false);
-  const inputRef = useRef<Input>(null);
+  // const inputRef = useRef<Input>(null);
   const form = useContext(EditableContext)!;
 
-  useEffect(() => {
-    if (editing) {
-      inputRef.current!.focus();
-    }
-  }, [editing]);
+  // 这个副作用其实挺sb的，就是点编辑时，input不一定在编辑态。
+  // 此时 强制input进入编辑态，才能保证blur时还原到不可编辑状态
+  // 然而，antd的select 和 inputnumber都有autofocus prop，就input 没有
+  // 开心切换。
+  // useEffect(() => {
+  //   if (editing && inputRef.current) {
+  //     inputRef.current!.focus();
+  //   }
+  // }, [editing]);
 
   const toggleEdit = () => {
     setEditing(!editing);
@@ -69,10 +73,36 @@ const EditableCell: React.FC<EditableCellProps> = ({
       console.log('Save failed:', errInfo);
     }
   };
+  
+  const renderSwitch = (dataIndexType: string) => {
+    switch (dataIndexType) {
+      case 'name':
+        return (
+          <Select
+            // ref={selectorRef}
+            autoFocus
+            onBlur={save}
+          />
+        );
+      case 'age':
+        return (
+          <InputNumber
+            // ref={inputRef}
+            autoFocus
+            onPressEnter={save}
+            onBlur={save}
+          />
+        );
+      default:
+        return <></>;
+    }
+  };
 
   let childNode = children;
 
   if (editable) {
+    console.log(dataIndex);
+    
     childNode = editing ? (
       <Form.Item
         style={{ margin: 0 }}
@@ -84,7 +114,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           },
         ]}
       >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+        {renderSwitch(dataIndex)}
       </Form.Item>
     ) : (
       <div
@@ -106,7 +136,6 @@ type DataType = {
   key: React.Key;
   name: string;
   age: string;
-  address: string;
 }
 
 type EditableTableState = {
@@ -126,25 +155,21 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
       {
         title: 'name',
         dataIndex: 'name',
-        width: '30%',
+        // width: '30%',
         editable: true,
       },
       {
         title: 'age',
         dataIndex: 'age',
+        editable: true,
       },
       {
-        title: 'address',
-        dataIndex: 'address',
-      },
-      {
-        title: 'operation',
+        title: '操作',
         dataIndex: 'operation',
+        width: 65,
         render: (_, record: { key: React.Key }) =>
           this.state.dataSource.length >= 1 ? (
-            <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.key)}>
-              <a>Delete</a>
-            </Popconfirm>
+            <DeleteOutlined onClick={() => this.handleDelete(record.key)}/>
           ) : null,
       },
     ];
@@ -155,13 +180,11 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
           key: '0',
           name: 'King 0',
           age: '32',
-          address: 'London, Park Lane no. 0',
         },
         {
           key: '1',
           name: 'King 1',
           age: '32',
-          address: 'London, Park Lane no. 1',
         },
       ],
       count: 2,
@@ -179,12 +202,12 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
       key: count,
       name: `King ${count}`,
       age: '32',
-      address: `London, Park Lane no. ${count}`,
     };
     this.setState({
       dataSource: [...dataSource, newData],
       count: count + 1,
     });
+    message.success('已在底部添加一行！');
   };
 
   handleSave = (row: DataType) => {
@@ -226,17 +249,19 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
         <Button
           onClick={this.handleAdd}
           type="primary"
-          style={{ marginBottom: 16 }}  // Add a row 按钮与表格之间距离
+          style={{ marginBottom: 20 }}  // Add row 按钮与表格之间距离
         >
           Add a row
         </Button>
         <Table
           components={components}
-          rowClassName={() => 'editable-row'}
+          rowClassName="editable-row"
           bordered
+          sticky
           dataSource={dataSource}
           columns={columns as ColumnTypes}
           pagination={false}
+          scroll={{ y: 300 }}  // 可观察到的y高度 单位px
         />
       </div>
     );
