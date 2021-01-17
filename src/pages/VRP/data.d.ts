@@ -11,9 +11,10 @@ export type algorithmDataType = {
 
 export type POIDataType = {
   name: string;
-  uid: string;  // unique id
+  key: string;  // unique id
   lng: number;  // longitude
   lat: number;  // latitude
+  demand: number;
 };
 
 // props type

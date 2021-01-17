@@ -2,6 +2,7 @@ import React from 'react';
 import { Select } from 'antd';
 // TODO 不需要后，记得删除 package.json 中的 fetch-jsonp
 import jsonp from 'fetch-jsonp';
+// 用来 fetch data  可删除
 import querystring from 'querystring';
 import 'antd/dist/antd.css';
 
@@ -10,6 +11,7 @@ const { Option } = Select;
 let timeout;
 let currentValue;
 
+// 放 service
 function fetch(value, callback) {
   if (timeout) {
     clearTimeout(timeout);
@@ -44,10 +46,11 @@ function fetch(value, callback) {
 }
 
 class SearchInput extends React.Component {
+  // props 传
   state = {
     // here state contains two separate state:
-    // 1. data {Array}
-    // 2. value
+    // 1. data {Array}   根据用户输入 fetch 到的东西
+    // 2. value          用户输入的东西
     data: [],
     value: undefined,
   };

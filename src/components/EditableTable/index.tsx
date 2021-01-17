@@ -1,20 +1,29 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useState } from 'react';
 import { Table, Select, InputNumber, Button, Form, message } from 'antd';
+// 后期删除 pro 组件
+import ProField from '@ant-design/pro-field';
+import ProCard from '@ant-design/pro-card';
 import type { FormInstance } from 'antd/lib/form';
 import { DeleteOutlined } from '@ant-design/icons';
+import { localSearch } from '@/services/bmap-service';
+
+const { Option } = Select;
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
-type Item = {
+type POI = {
   key: string;
   name: string;
-  age: string;
+  lng: number;  // longitude
+  lat: number;  // latitude
+  demand: number;
 }
 
 type EditableRowProps = {
   index: number;
 }
 
+// below is for Row definition
 const EditableRow: React.FC<EditableRowProps> = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
@@ -30,11 +39,13 @@ type EditableCellProps = {
   title: React.ReactNode;
   editable: boolean;
   children: React.ReactNode;
-  dataIndex: keyof Item;
-  record: Item;
-  handleSave: (record: Item) => void;
+  dataIndex: keyof POI;
+  record: POI;
+  handleSave: (record: POI) => void;
 }
 
+
+// below is for Cell definition
 const EditableCell: React.FC<EditableCellProps> = ({
   title,
   editable,
@@ -48,9 +59,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
   // const inputRef = useRef<Input>(null);
   const form = useContext(EditableContext)!;
 
-  // 这个副作用其实挺sb的，就是点编辑时，input不一定在编辑态。
+  // 这个副作用其实挺**的，就是点编辑时，input不一定在编辑态。
   // 此时 强制input进入编辑态，才能保证blur时还原到不可编辑状态
-  // 然而，antd的select 和 inputnumber都有autofocus prop，就input 没有
+  // 然而，antd的select 和 inputnumber都有autofocus prop，就input 没有...
   // 开心切换。
   // useEffect(() => {
   //   if (editing && inputRef.current) {
@@ -80,17 +91,27 @@ const EditableCell: React.FC<EditableCellProps> = ({
         return (
           <Select
             // ref={selectorRef}
+            showSearch
+            placeholder="input search text"
+            defaultActiveFirstOption={false}
+            showArrow={false}
+            filterOption={false}
+            // onSearch={this.handleSearch}
             autoFocus
             onBlur={save}
-          />
+          >
+            {/* 加入 {options} */}
+          </Select>
         );
-      case 'age':
+      case 'demand':
         return (
           <InputNumber
             // ref={inputRef}
             autoFocus
             onPressEnter={save}
             onBlur={save}
+            min={0}  // 但不能等于 0，由于无法设置开区间，在validate时再检查
+            step={1}
           />
         );
       default:
@@ -100,9 +121,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   let childNode = children;
 
-  if (editable) {
-    console.log(dataIndex);
-    
+  if (editable) {    
     childNode = editing ? (
       <Form.Item
         style={{ margin: 0 }}
@@ -119,7 +138,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     ) : (
       <div
         className="editable-cell-value-wrap"
-        // style={{ paddingRight: 10 }}
+        style={{ paddingRight: 24 }}
         onClick={toggleEdit}
       >
         {children}
@@ -135,7 +154,9 @@ type EditableTableProps = Parameters<typeof Table>[0];
 type DataType = {
   key: React.Key;
   name: string;
-  age: string;
+  lng: number;
+  lat: number;
+  demand: number;
 }
 
 type EditableTableState = {
@@ -153,14 +174,15 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
 
     this.columns = [
       {
-        title: 'name',
+        title: '地点',
         dataIndex: 'name',
         // width: '30%',
         editable: true,
       },
       {
-        title: 'age',
-        dataIndex: 'age',
+        title: '需求',
+        dataIndex: 'demand',
+        width: '25%',
         editable: true,
       },
       {
@@ -175,18 +197,24 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
     ];
 
     this.state = {
+
       dataSource: [
         {
-          key: '0',
+          key: 'ww1i25sk',
           name: 'King 0',
-          age: '32',
+          lng: 0,
+          lat: 0,
+          demand: 1,
         },
         {
-          key: '1',
+          key: 'p8lbmzcb',
           name: 'King 1',
-          age: '32',
+          lng: 0,
+          lat: 0,
+          demand: 1,
         },
       ],
+
       count: 2,
     };
   }
@@ -196,12 +224,15 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
     this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
   };
 
+  // 不改名
   handleAdd = () => {
     const { count, dataSource } = this.state;
     const newData: DataType = {
-      key: count,
-      name: `King ${count}`,
-      age: '32',
+      key: Math.random().toString(36).slice(-8),
+      name: '[新地点]',  // `King ${count}`
+      lng: 123,
+      lat: 45,
+      demand: 1,
     };
     this.setState({
       dataSource: [...dataSource, newData],
@@ -245,7 +276,7 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
       };
     });
     return (
-      <div>
+      <>
         <Button
           onClick={this.handleAdd}
           type="primary"
@@ -263,7 +294,20 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
           pagination={false}
           scroll={{ y: 300 }}  // 可观察到的y高度 单位px
         />
-      </div>
+        {/* 辅助 */}
+        <ProCard title="表格数据" headerBordered collapsible defaultCollapsed>
+          <ProField
+            fieldProps={{
+              style: {
+                width: '100%',
+              },
+            }}
+            mode="read"
+            valueType="jsonCode"
+            text={JSON.stringify(dataSource)}
+          />
+        </ProCard>
+      </>
     );
   }
 }
