@@ -17,22 +17,39 @@ const { Step } = Steps;
 
 const StepForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<CurrentStepType>('step1');
-  const [algorithmData, setAlgorithmData] = useState<algorithmDataType>({
+
+  const [rootAlgoData, setRootAlgoData] = useState<algorithmDataType>({
     algorithm: 'SA',
     initialTemp: 1e3,
     finalTemp: 1e-3,
     coolingRate: 0.9,
     chainLength: 10,
   });
-  const [POIData, setPOIData] = useState<POIDataType[]>([]);
+
+  const [rootPOIData, setRootPOIData] = useState<POIDataType[]>([
+    {
+      key: 'ww1i25sk',
+      name: '四季青阳光科技园区-东1门',
+      lng: 116.426549,
+      lat: 39.779675,
+      demand: 6,  // 每车载重量
+    },
+    {
+      key: 'p8lbmzcb',
+      name: '北京师范大学北院-西3门',
+      lng: 116.409614,
+      lat: 39.942402,
+      demand: 1,
+    },
+  ]);
 
   const stepAndComponentProps: StepAndComponentPropsType = {
     currentStep,
     setCurrentStep,
-    algorithmData,
-    setAlgorithmData,
-    POIData,
-    setPOIData,
+    rootAlgoData,
+    setRootAlgoData,
+    rootPOIData,
+    setRootPOIData,
   };
 
   const { step, component } = useMemo(() => {
@@ -66,7 +83,7 @@ const StepForm: React.FC = () => {
         </Col>
       </Row>
       <Row gutter={[16, 16]}>
-        <Col span={10}>
+        <Col span={16}>
           <Card>
             <Steps size="small" current={step} className={styles.steps}>
               <Step title="算法" />
@@ -76,7 +93,7 @@ const StepForm: React.FC = () => {
             {component}
           </Card>
         </Col>
-        <Col span={14}>
+        <Col span={8}>
           <Card>
             <BaiduMap />
           </Card>

@@ -5,19 +5,14 @@ import ProField from '@ant-design/pro-field';
 import ProCard from '@ant-design/pro-card';
 import type { FormInstance } from 'antd/lib/form';
 import { DeleteOutlined } from '@ant-design/icons';
+
 import { localSearch } from '@/services/bmap-service';
+
+import type { POIDataType } from '@/pages/VRP/data';
 
 const { Option } = Select;
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
-
-type POI = {
-  key: string;
-  name: string;
-  lng: number;  // longitude
-  lat: number;  // latitude
-  demand: number;
-}
 
 type EditableRowProps = {
   index: number;
@@ -39,9 +34,9 @@ type EditableCellProps = {
   title: React.ReactNode;
   editable: boolean;
   children: React.ReactNode;
-  dataIndex: keyof POI;
-  record: POI;
-  handleSave: (record: POI) => void;
+  dataIndex: keyof POIDataType;
+  record: POIDataType;
+  handleSave: (record: POIDataType) => void;
 }
 
 
@@ -59,7 +54,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   // const inputRef = useRef<Input>(null);
   const form = useContext(EditableContext)!;
 
-  // 这个副作用其实挺**的，就是点编辑时，input不一定在编辑态。
+  // 这个副作用其实挺的，就是点编辑时，input不一定在编辑态。
   // 此时 强制input进入编辑态，才能保证blur时还原到不可编辑状态
   // 然而，antd的select 和 inputnumber都有autofocus prop，就input 没有...
   // 开心切换。
@@ -79,7 +74,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
       const values = await form.validateFields();
 
       toggleEdit();
-      handleSave({ ...record, ...values });
+      handleSave({ ...record, ...values }); // values覆盖record相同key部分
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
@@ -92,15 +87,15 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <Select
             // ref={selectorRef}
             showSearch
+            autoFocus
             placeholder="input search text"
             defaultActiveFirstOption={false}
             showArrow={false}
             filterOption={false}
             // onSearch={this.handleSearch}
-            autoFocus
             onBlur={save}
           >
-            {/* 加入 {options} */}
+            {/* TODO 加入 {options} */}
           </Select>
         );
       case 'demand':
@@ -151,32 +146,29 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 type EditableTableProps = Parameters<typeof Table>[0];
 
-type DataType = {
-  key: React.Key;
-  name: string;
-  lng: number;
-  lat: number;
-  demand: number;
+type FormPassedProps = {
+  step2POIData: POIDataType[];
+  setStep2POIData: React.Dispatch<React.SetStateAction<POIDataType[]>>;
 }
 
-type EditableTableState = {
-  dataSource: DataType[];
-  count: number;
-}
+// type EditableTableState = {
+//   dataSource: POIDataType[];
+// }
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
-class EditableTable extends React.Component<EditableTableProps, EditableTableState> {
+class EditableTable extends React.Component<EditableTableProps & FormPassedProps, any> {
   columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[];
 
-  constructor(props: EditableTableProps) {
+  constructor(props: EditableTableProps & FormPassedProps) {
+    
     super(props);
+    // console.log(props);
 
     this.columns = [
       {
         title: '地点',
         dataIndex: 'name',
-        // width: '30%',
         editable: true,
       },
       {
@@ -190,70 +182,47 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
         dataIndex: 'operation',
         width: 65,
         render: (_, record: { key: React.Key }) =>
-          this.state.dataSource.length >= 1 ? (
+          this.props.step2POIData.length >= 1 ? (
             <DeleteOutlined onClick={() => this.handleDelete(record.key)}/>
           ) : null,
       },
     ];
-
-    this.state = {
-
-      dataSource: [
-        {
-          key: 'ww1i25sk',
-          name: 'King 0',
-          lng: 0,
-          lat: 0,
-          demand: 1,
-        },
-        {
-          key: 'p8lbmzcb',
-          name: 'King 1',
-          lng: 0,
-          lat: 0,
-          demand: 1,
-        },
-      ],
-
-      count: 2,
-    };
   }
 
   handleDelete = (key: React.Key) => {
-    const dataSource = [...this.state.dataSource];
-    this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
+    const dataSource = [...this.props.step2POIData];
+    this.props.setStep2POIData(dataSource.filter(item => item.key !== key));
   };
 
   // 不改名
   handleAdd = () => {
-    const { count, dataSource } = this.state;
-    const newData: DataType = {
+    const dataSource = [...this.props.step2POIData];
+    const newData: POIDataType = {
       key: Math.random().toString(36).slice(-8),
-      name: '[新地点]',  // `King ${count}`
-      lng: 123,
-      lat: 45,
+      name: '[新地点]',
+      lng: 0,
+      lat: 0,
       demand: 1,
     };
-    this.setState({
-      dataSource: [...dataSource, newData],
-      count: count + 1,
-    });
+    this.props.setStep2POIData([...dataSource, newData]);
+    // console.log(this.props.step2POIData);
+    
     message.success('已在底部添加一行！');
   };
 
-  handleSave = (row: DataType) => {
-    const newData = [...this.state.dataSource];
+  handleSave = (row: POIDataType) => {
+    const newData = [...this.props.step2POIData];
     const index = newData.findIndex(item => row.key === item.key);
     const item = newData[index];
     newData.splice(index, 1, {
       ...item,
       ...row,
     });
-    this.setState({ dataSource: newData });
+    this.props.setStep2POIData(newData);
   };
 
   render() {
-    const { dataSource } = this.state;
+    const { step2POIData } = this.props;
     const components = {
       body: {
         row: EditableRow,
@@ -266,7 +235,7 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
       }
       return {
         ...col,
-        onCell: (record: DataType) => ({
+        onCell: (record: POIDataType) => ({
           record,
           editable: col.editable,
           dataIndex: col.dataIndex,
@@ -289,7 +258,7 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
           rowClassName="editable-row"
           bordered
           sticky
-          dataSource={dataSource}
+          dataSource={step2POIData}
           columns={columns as ColumnTypes}
           pagination={false}
           scroll={{ y: 300 }}  // 可观察到的y高度 单位px
@@ -304,7 +273,7 @@ class EditableTable extends React.Component<EditableTableProps, EditableTableSta
             }}
             mode="read"
             valueType="jsonCode"
-            text={JSON.stringify(dataSource)}
+            text={JSON.stringify(step2POIData)}
           />
         </ProCard>
       </>

@@ -14,15 +14,21 @@ const formItemLayout = {
   },
 };
 
-const Step1Form: React.FC<StepAndComponentPropsType> = (props) => {
-  const { algorithmData, setAlgorithmData, setCurrentStep } = props;
-  const { algorithm, initialTemp, finalTemp, coolingRate, chainLength } = algorithmData;
+const Step1Form: React.FC<StepAndComponentPropsType> = ({
+  rootAlgoData,
+  setRootAlgoData,
+  setCurrentStep
+}) => {
+  const { algorithm, initialTemp, finalTemp, coolingRate, chainLength } = rootAlgoData;
 
-  const [algorithmSelected, selectAlgorithm] = useState<string>(algorithm);
+  // VRP页面层维护一个algorithm state, step1 form 层也维护一个 temp
+  // algorithm state. 点击 下一步/上一步 后，*才*将本层的 temp state set 至 
+  // 上层。
+  const [step1AlgoData, setStep1AlgoData] = useState<string>(algorithm);
 
   const [form] = Form.useForm();
 
-  if (!algorithmData) {
+  if (!rootAlgoData) {
     return null;
   }
 
@@ -32,7 +38,7 @@ const Step1Form: React.FC<StepAndComponentPropsType> = (props) => {
     // console.log(values);
     // console.log(values.finalTemp, finalTemp);
     // validate algorithm logic again before entering step 2
-    if (algorithmSelected === 'SA') {
+    if (step1AlgoData === 'SA') {
       if (
         values.initialTemp <= 0 ||
         values.finalTemp <= 0 ||
@@ -48,13 +54,13 @@ const Step1Form: React.FC<StepAndComponentPropsType> = (props) => {
       message.error('选中算法没写');
       return;
     }
-    setAlgorithmData({ ...algorithmData, ...values });
+    setRootAlgoData({ ...rootAlgoData, ...values });
     // TODO step3 计算后，可通过set TSP页面的State，传step3界面实时计算结果至father comp,再从props传给 1、3、4 child comp.
     setCurrentStep('step2');
   };
 
   const algorithmSelectorHandler = (value: string) => {
-    selectAlgorithm(value);
+    setStep1AlgoData(value);
   };
 
   const renderSwitch = (algorithmChoice: string) => {
@@ -143,7 +149,7 @@ const Step1Form: React.FC<StepAndComponentPropsType> = (props) => {
       layout="horizontal"
       className={styles.stepForm}
       hideRequiredMark
-      initialValues={algorithmData}
+      initialValues={rootAlgoData}
     >
       <Divider />
       <Form.Item
@@ -156,7 +162,7 @@ const Step1Form: React.FC<StepAndComponentPropsType> = (props) => {
           <Option value="GA">遗传算法</Option>
         </Select>
       </Form.Item>
-      {renderSwitch(algorithmSelected)}
+      {renderSwitch(step1AlgoData)}
       <Form.Item
         wrapperCol={{
           xs: { span: 24, offset: 0 },

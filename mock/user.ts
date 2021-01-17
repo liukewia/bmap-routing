@@ -42,7 +42,7 @@ export default {
       return;
     }
     res.send({
-      name: 'Admin',
+      name: 'User',
       avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
       userid: '00000001',
       email: 'antdesign@alipay.com',

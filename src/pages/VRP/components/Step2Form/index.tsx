@@ -1,33 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Button, Divider, Space } from 'antd';
 import EditableTable from "@/components/EditableTable";
 import SearchInput from "@/components/SearchInput";
-import type { StepAndComponentPropsType } from '../../data';
+
+import type { POIDataType, StepAndComponentPropsType } from '../../data';
 
 
-const Step2Form: React.FC<StepAndComponentPropsType> = (props) => {
+const Step2Form: React.FC<StepAndComponentPropsType> = ({
+  rootPOIData,
+  setRootPOIData,
+  setCurrentStep
+}) => {
+  const [step2POIData, setStep2POIData] = useState<POIDataType[]>(rootPOIData);
+
+
   const [form] = Form.useForm();
 
-  const { POIData, setPOIData, setCurrentStep } = props;
-
-  if (!POIData) {
+  if (!rootPOIData) {
     return null;
   }
 
   const { validateFields, getFieldsValue } = form;
 
   const onPrev = () => {
-    const values = getFieldsValue();
+    const values = getFieldsValue();  // 获取不到Editable Table的值
+    console.log(values);
+    
     // although go back, save POI data.
-    setPOIData({ ...POIData, ...values });
+    setRootPOIData({ ...step2POIData, ...values });
     setCurrentStep('step1');
   };
 
   const onValidateForm = async () => {
     const values = await validateFields();
-
+    console.log(values);
     // is going to step 3, save POI data.
-    setPOIData({ ...POIData, ...values });
+    setRootPOIData({ ...step2POIData, ...values });
     setCurrentStep('result');
   };
 
@@ -38,11 +46,12 @@ const Step2Form: React.FC<StepAndComponentPropsType> = (props) => {
     >
       <Divider />
       <Form.Item>
-        <EditableTable />
+        <EditableTable
+          step2POIData={step2POIData}
+          setStep2POIData={setStep2POIData}
+        />
       </Form.Item>
-      <Form.Item>
-        <SearchInput />
-      </Form.Item>
+      <SearchInput />
       <Form.Item>
         <Space
           // TODO 如何居中

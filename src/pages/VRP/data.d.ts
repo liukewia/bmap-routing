@@ -10,8 +10,8 @@ export type algorithmDataType = {
 };
 
 export type POIDataType = {
+  key: React.Key;
   name: string;
-  key: string;  // unique id
   lng: number;  // longitude
   lat: number;  // latitude
   demand: number;
@@ -21,8 +21,8 @@ export type POIDataType = {
 export type StepAndComponentPropsType = {
   currentStep: CurrentStepType;
   setCurrentStep: React.Dispatch<React.SetStateAction<CurrentStepType>>;
-  algorithmData: algorithmDataType;
-  setAlgorithmData: React.Dispatch<React.SetStateAction<algorithmDataType>>;
-  POIData: POIDataType[];
-  setPOIData: React.Dispatch<React.SetStateAction<POIDataType[]>>;
+  rootAlgoData: algorithmDataType;
+  setRootAlgoData: React.Dispatch<React.SetStateAction<algorithmDataType>>;
+  rootPOIData: POIDataType[];
+  setRootPOIData: React.Dispatch<React.SetStateAction<POIDataType[]>>;
 };
