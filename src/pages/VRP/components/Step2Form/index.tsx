@@ -23,19 +23,19 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
   const { validateFields, getFieldsValue } = form;
 
   const onPrev = () => {
-    const values = getFieldsValue();  // 获取不到Editable Table的值
-    console.log(values);
+    // const values = getFieldsValue();  // 获取不到Editable Table的值
+    console.log(step2POIData);
     
     // although go back, save POI data.
-    setRootPOIData({ ...step2POIData, ...values });
+    setRootPOIData(step2POIData);
     setCurrentStep('step1');
   };
 
   const onValidateForm = async () => {
-    const values = await validateFields();
-    console.log(values);
+    // const values = await validateFields();
+    console.log(step2POIData);
     // is going to step 3, save POI data.
-    setRootPOIData({ ...step2POIData, ...values });
+    setRootPOIData(step2POIData);
     setCurrentStep('result');
   };
 
