@@ -1,10 +1,25 @@
 import React, { useState } from 'react';
-import { Form, Button, Divider, Space } from 'antd';
+import { Form, Button, Divider, Space, message } from 'antd';
 import EditableTable from "@/components/EditableTable";
 import SearchInput from "@/components/SearchInput";
 
 import type { POIDataType, StepAndComponentPropsType } from '../../data';
 
+
+const validatePOI = (data: POIDataType[]) => {
+  const capacity: number = data[0].demand;
+  data.forEach(POI => {
+    if ( POI.lng === 0 || POI.lat === 0 ) {
+      throw new Error(`${POI.name} 的经纬度不正确！`);
+    }
+    if ( POI.demand <= 0 ) {
+      throw new Error(`${POI.name} 的需求量不合法！`);
+    }
+    if ( capacity < POI.demand ) {
+      throw new Error(`车辆载重量过小，不足以装载 ${POI.name} 处货物！`);
+    }
+  });
+}
 
 const Step2Form: React.FC<StepAndComponentPropsType> = ({
   rootPOIData,
@@ -20,23 +35,41 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
     return null;
   }
 
-  const { validateFields, getFieldsValue } = form;
+  // const { validateFields, getFieldsValue } = form;
+
+  
 
   const onPrev = () => {
+    const POIData = JSON.parse(JSON.stringify(step2POIData));
     // const values = getFieldsValue();  // 获取不到Editable Table的值
-    console.log(step2POIData);
-    
-    // although go back, save POI data.
-    setRootPOIData(step2POIData);
-    setCurrentStep('step1');
+    console.log(POIData);
+    // Wrap it with try & catch since return cannot jump out of outer function.
+    try {
+      validatePOI(step2POIData);
+
+      // if having thrown no error after check, continue; else shut down.
+      // although just go back, it still will set root state, so CHECK
+      // before saving POI data.
+      setRootPOIData(POIData);
+      setCurrentStep('step1');
+    } catch (e) {
+      message.error(e.message);
+    }
   };
 
   const onValidateForm = async () => {
     // const values = await validateFields();
     console.log(step2POIData);
-    // is going to step 3, save POI data.
-    setRootPOIData(step2POIData);
-    setCurrentStep('result');
+    // validate step2POIData, then setRootPOIData, and go forward.
+    try {
+      validatePOI(step2POIData);
+
+      // is going to step 3, save POI data.
+      setRootPOIData(step2POIData);
+      setCurrentStep('result');
+    } catch (e) {
+      message.error(e.message);
+    }
   };
 
   return (

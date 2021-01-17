@@ -57,7 +57,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
   // 这个副作用其实挺的，就是点编辑时，input不一定在编辑态。
   // 此时 强制input进入编辑态，才能保证blur时还原到不可编辑状态
   // 然而，antd的select 和 inputnumber都有autofocus prop，就input 没有...
-  // 开心切换。
   // useEffect(() => {
   //   if (editing && inputRef.current) {
   //     inputRef.current!.focus();
@@ -190,8 +189,13 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
   }
 
   handleDelete = (key: React.Key) => {
-    const dataSource = [...this.props.step2POIData];
-    this.props.setStep2POIData(dataSource.filter(item => item.key !== key));
+    try {
+      const dataSource = [...this.props.step2POIData];
+      this.props.setStep2POIData(dataSource.filter(item => item.key !== key));
+      message.success('删除地点成功！');
+    } catch (e) {
+      message.error(`删除地点失败，${e.message} !`);
+    }
   };
 
   // 不改名
