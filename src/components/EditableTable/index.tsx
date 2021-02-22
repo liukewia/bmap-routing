@@ -6,11 +6,9 @@ import ProCard from '@ant-design/pro-card';
 import type { FormInstance } from 'antd/lib/form';
 import { DeleteOutlined } from '@ant-design/icons';
 
-import { localSearch } from '@/services/bmap-service';
 
 import type { POIDataType } from '@/pages/VRP/data';
-
-const { Option } = Select;
+import { fetchBmapPOI } from '@/services/bmap-service';
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -35,10 +33,18 @@ type EditableCellProps = {
   editable: boolean;
   children: React.ReactNode;
   dataIndex: keyof POIDataType;
-  record: POIDataType;
+  record: POIDataType;  // 仅显示 name & demand
   handleSave: (record: POIDataType) => void;
 }
 
+type rawPOIDataType = {
+  key: React.Key;
+  name: string;
+  lng: number;  // longitude
+  lat: number;  // latitude
+}
+
+const { Option } = Select;
 
 // below is for Cell definition
 const EditableCell: React.FC<EditableCellProps> = ({
@@ -47,16 +53,21 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   dataIndex,
   record,
-  handleSave,
+  handleSave,  // Editable Table 传来的 set state 方法
   ...restProps
 }) => {
   const [editing, setEditing] = useState(false);
+
+  // 下面两个state是
+  const [selectedValue, setSelectedValue] = useState<string>("");
+  const [searchResult, setSearchResult] = useState<rawPOIDataType[]>([]);
+  
   // const inputRef = useRef<Input>(null);
   const form = useContext(EditableContext)!;
 
-  // 这个副作用其实挺的，就是点编辑时，input不一定在编辑态。
+  // 这个副作用是点编辑时，input不一定在编辑态。
   // 此时 强制input进入编辑态，才能保证blur时还原到不可编辑状态
-  // 然而，antd的select 和 inputnumber都有autofocus prop，就input 没有...
+  // 然而，antd的select 和 inputnumber都有autofocus prop，就input没有.
   // useEffect(() => {
   //   if (editing && inputRef.current) {
   //     inputRef.current!.focus();
@@ -68,10 +79,25 @@ const EditableCell: React.FC<EditableCellProps> = ({
     form.setFieldsValue({ [dataIndex]: record[dataIndex] });
   };
 
+  const handleSearch = (userInput: string) => {
+    if (userInput) {
+      try {
+        fetchBmapPOI(userInput, searchData => {
+          console.log(searchData);
+          setSearchResult(searchData);
+        });
+      } catch (errInfo) {
+        console.log('Search failed:', errInfo);
+      }
+    } else {
+      setSearchResult([]);
+    }
+  };
+
   const save = async () => {
     try {
       const values = await form.validateFields();
-
+      console.log(values);
       toggleEdit();
       handleSave({ ...record, ...values }); // values覆盖record相同key部分
     } catch (errInfo) {
@@ -79,6 +105,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     }
   };
   
+  // 在 oop 里，自然的想法是子类继承 Editable Cell 降低耦合，但在这里似乎无法做到，并且 https://ant.design/components/table-cn/#components-table-demo-edit-row 里的 official demo 也是在一个类里用 unary operator 实现 不同组件的。
   const renderSwitch = (dataIndexType: string) => {
     switch (dataIndexType) {
       case 'name':
@@ -87,14 +114,15 @@ const EditableCell: React.FC<EditableCellProps> = ({
             // ref={selectorRef}
             showSearch
             autoFocus
+            value={this.state.value}  // 搜索得到的n条数据
             placeholder="input search text"
             defaultActiveFirstOption={false}
             showArrow={false}
             filterOption={false}
-            // onSearch={this.handleSearch}
+            onSearch={handleSearch}
             onBlur={save}
           >
-            {/* TODO 加入 {options} */}
+            {searchResult.map(d => <Option key={d.value}>{d.text}</Option>)}
           </Select>
         );
       case 'demand':
@@ -171,7 +199,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
         editable: true,
       },
       {
-        title: '需求',
+        title: '需求(首行为车辆载重)',
         dataIndex: 'demand',
         width: '25%',
         editable: true,
@@ -182,11 +210,13 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
         width: 65,
         render: (_, record: { key: React.Key }) =>
           this.props.step2POIData.length >= 1 ? (
-            <DeleteOutlined onClick={() => this.handleDelete(record.key)}/>
+            <DeleteOutlined disabled onClick={() => this.handleDelete(record.key)}/>
           ) : null,
       },
     ];
   }
+
+  
 
   handleDelete = (key: React.Key) => {
     try {
@@ -202,7 +232,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
   handleAdd = () => {
     const dataSource = [...this.props.step2POIData];
     const newData: POIDataType = {
-      key: Math.random().toString(36).slice(-8),
+      key: Math.random().toString(36).slice(-8),  // 非 bmap poi key
       name: '[新地点]',
       lng: 0,
       lat: 0,
@@ -240,6 +270,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
       return {
         ...col,
         onCell: (record: POIDataType) => ({
+          // props -> editable cell
           record,
           editable: col.editable,
           dataIndex: col.dataIndex,
