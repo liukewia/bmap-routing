@@ -35,8 +35,6 @@ const Step1Form: React.FC<StepAndComponentPropsType> = ({
   // will go to step 2
   const onValidateForm = async () => {
     const values = await form.validateFields();
-    // console.log(values);
-    // console.log(values.finalTemp, finalTemp);
     // validate algorithm logic again before entering step 2
     if (step1AlgoData === 'SA') {
       if (

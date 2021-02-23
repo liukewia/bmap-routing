@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Form, Button, Divider, Space, message } from 'antd';
+import { Form, Button, Divider, Space, message, Alert } from 'antd';
 import EditableTable from "@/components/EditableTable";
-import SearchInput from "@/components/SearchInput";
 
 import type { POIDataType, StepAndComponentPropsType } from '../../data';
 
@@ -47,9 +46,7 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
     try {
       validatePOI(step2POIData);
 
-      // if having thrown no error after check, continue; else shut down.
-      // although just go back, it still will set root state, so CHECK
-      // before saving POI data.
+      // if having thrown no error after check, continue; else shut down. although just go back, it still will set root state, so CHECK before saving POI data.
       setRootPOIData(POIData);
       setCurrentStep('step1');
     } catch (e) {
@@ -57,7 +54,7 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
     }
   };
 
-  const onValidateForm = async () => {
+  const onNext = async () => {
     // const values = await validateFields();
     console.log(step2POIData);
     // validate step2POIData, then setRootPOIData, and go forward.
@@ -78,16 +75,22 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
       layout="horizontal"
     >
       <Divider />
+      <Alert
+        message="1. 点击地点可以直接在线搜索并修改；  2. 首行地点为配送点，其需求量为每辆车的载重；其余行地点为需求点。  3.配送至需求点的车辆数不需要设置，由计算得出结果。"
+        type="info"
+        showIcon
+        closable
+        style={{ marginBottom: 20 }}
+      />
       <Form.Item>
         <EditableTable
           step2POIData={step2POIData}
           setStep2POIData={setStep2POIData}
         />
       </Form.Item>
-      <SearchInput />
       <Form.Item>
         <Space
-          // TODO 如何居中
+          // TODO 居中
           style={{ marginLeft: '150px' }}
           size='large'
         >
@@ -96,7 +99,7 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
           </Button>
           <Button
             type="primary"
-            onClick={onValidateForm}
+            onClick={onNext}
           >
             提交
           </Button>

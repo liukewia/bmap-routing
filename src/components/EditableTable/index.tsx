@@ -1,14 +1,15 @@
 import React, { useContext, useState } from 'react';
-import { Table, Select, InputNumber, Button, Form, message } from 'antd';
+import { Table, InputNumber, Button, Form, message } from 'antd';
 // 后期删除 pro 组件
 import ProField from '@ant-design/pro-field';
 import ProCard from '@ant-design/pro-card';
 import type { FormInstance } from 'antd/lib/form';
 import { DeleteOutlined } from '@ant-design/icons';
+import SearchInput from '@/components/SearchInput';
+import { generatePointKey } from '@/services/bmap-service';
 
-
+import type { RawPOIDataType } from '@/services/bmap-type';
 import type { POIDataType } from '@/pages/VRP/data';
-import { fetchBmapPOI } from '@/services/bmap-service';
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -37,16 +38,7 @@ type EditableCellProps = {
   handleSave: (record: POIDataType) => void;
 }
 
-type rawPOIDataType = {
-  key: React.Key;
-  name: string;
-  lng: number;  // longitude
-  lat: number;  // latitude
-}
 
-const { Option } = Select;
-
-// below is for Cell definition
 const EditableCell: React.FC<EditableCellProps> = ({
   title,
   editable,
@@ -58,11 +50,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }) => {
   const [editing, setEditing] = useState(false);
 
-  // 下面两个state是
-  const [selectedValue, setSelectedValue] = useState<string>("");
-  const [searchResult, setSearchResult] = useState<rawPOIDataType[]>([]);
-  
-  // const inputRef = useRef<Input>(null);
   const form = useContext(EditableContext)!;
 
   // 这个副作用是点编辑时，input不一定在编辑态。
@@ -74,64 +61,49 @@ const EditableCell: React.FC<EditableCellProps> = ({
   //   }
   // }, [editing]);
 
-  const toggleEdit = () => {
+  const toggleEdit = (): void => {
     setEditing(!editing);
     form.setFieldsValue({ [dataIndex]: record[dataIndex] });
   };
 
-  const handleSearch = (userInput: string) => {
-    if (userInput) {
-      try {
-        fetchBmapPOI(userInput, searchData => {
-          console.log(searchData);
-          setSearchResult(searchData);
-        });
-      } catch (errInfo) {
-        console.log('Search failed:', errInfo);
-      }
-    } else {
-      setSearchResult([]);
+  const saveSearchResult = async (selectedRow: RawPOIDataType) => {
+    try {
+      const { key, ...resultWithoutKey } = selectedRow;
+      await form.validateFields();
+      toggleEdit();
+      handleSave({ ...record, ...resultWithoutKey });  // 不改 key
+    } catch (errInfo) {
+      console.log('Save failed:', errInfo);
     }
   };
 
-  const save = async () => {
+  const saveDemand = async (): Promise<void> => {
     try {
-      const values = await form.validateFields();
-      console.log(values);
-      toggleEdit();
+      const values = await form.validateFields();  // 检查NamePath[]是否符合 form rules
+      toggleEdit();  // !edit 并 更新 form 显式内容
       handleSave({ ...record, ...values }); // values覆盖record相同key部分
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
     }
   };
-  
-  // 在 oop 里，自然的想法是子类继承 Editable Cell 降低耦合，但在这里似乎无法做到，并且 https://ant.design/components/table-cn/#components-table-demo-edit-row 里的 official demo 也是在一个类里用 unary operator 实现 不同组件的。
-  const renderSwitch = (dataIndexType: string) => {
+
+  // 在 oop 里，自然的想法是子类继承 Editable Cell 降低耦合，但在这里似乎无法做到，并且 https://ant.design/components/table-cn/#components-table-demo-edit-row 里的 official demo 也是在一个类里用判断来实现对不同组件的切换的。
+
+  const renderSwitch = (dataIndexType: string): JSX.Element => {
     switch (dataIndexType) {
       case 'name':
         return (
-          <Select
-            // ref={selectorRef}
-            showSearch
-            autoFocus
-            value={this.state.value}  // 搜索得到的n条数据
-            placeholder="input search text"
-            defaultActiveFirstOption={false}
-            showArrow={false}
-            filterOption={false}
-            onSearch={handleSearch}
-            onBlur={save}
-          >
-            {searchResult.map(d => <Option key={d.value}>{d.text}</Option>)}
-          </Select>
+          <SearchInput
+            record={record}
+            saveSearchResult={saveSearchResult}
+          />
         );
       case 'demand':
         return (
           <InputNumber
-            // ref={inputRef}
             autoFocus
-            onPressEnter={save}
-            onBlur={save}
+            onPressEnter={saveDemand}
+            onBlur={saveDemand}
             min={0}  // 但不能等于 0，由于无法设置开区间，在validate时再检查
             step={1}
           />
@@ -178,10 +150,6 @@ type FormPassedProps = {
   setStep2POIData: React.Dispatch<React.SetStateAction<POIDataType[]>>;
 }
 
-// type EditableTableState = {
-//   dataSource: POIDataType[];
-// }
-
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
 class EditableTable extends React.Component<EditableTableProps & FormPassedProps, any> {
@@ -190,7 +158,6 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
   constructor(props: EditableTableProps & FormPassedProps) {
     
     super(props);
-    // console.log(props);
 
     this.columns = [
       {
@@ -199,7 +166,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
         editable: true,
       },
       {
-        title: '需求(首行为车辆载重)',
+        title: '需求',
         dataIndex: 'demand',
         width: '25%',
         editable: true,
@@ -218,7 +185,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
 
   
 
-  handleDelete = (key: React.Key) => {
+  handleDelete = (key: React.Key): void => {
     try {
       const dataSource = [...this.props.step2POIData];
       this.props.setStep2POIData(dataSource.filter(item => item.key !== key));
@@ -228,23 +195,22 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
     }
   };
 
-  // 不改名
-  handleAdd = () => {
+  handleAdd = (): void => {
     const dataSource = [...this.props.step2POIData];
+
     const newData: POIDataType = {
-      key: Math.random().toString(36).slice(-8),  // 非 bmap poi key
+      key: generatePointKey(),  // 非 bmap poi key
       name: '[新地点]',
       lng: 0,
       lat: 0,
       demand: 1,
     };
     this.props.setStep2POIData([...dataSource, newData]);
-    // console.log(this.props.step2POIData);
     
     message.success('已在底部添加一行！');
   };
 
-  handleSave = (row: POIDataType) => {
+  handleSave = (row: POIDataType): void => {
     const newData = [...this.props.step2POIData];
     const index = newData.findIndex(item => row.key === item.key);
     const item = newData[index];
@@ -257,12 +223,14 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
 
   render() {
     const { step2POIData } = this.props;
+
     const components = {
       body: {
         row: EditableRow,
         cell: EditableCell,
       },
     };
+    
     const columns = this.columns.map(col => {
       if (!col.editable) {
         return col;
@@ -279,6 +247,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
         }),
       };
     });
+
     return (
       <>
         <Button
@@ -298,7 +267,6 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
           pagination={false}
           scroll={{ y: 300 }}  // 可观察到的y高度 单位px
         />
-        {/* 辅助 */}
         <ProCard title="表格数据" headerBordered collapsible defaultCollapsed>
           <ProField
             fieldProps={{

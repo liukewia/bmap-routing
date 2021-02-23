@@ -1,140 +1,88 @@
 import React from 'react';
-import { message, Select } from 'antd';
+import { Select } from 'antd';
+import { throttle } from 'lodash';
+import { fetchBmapPOI } from '@/services/bmap-service';
 
-import { localSearch } from '@/services/bmap-service';
-
+import type { RawPOIDataType } from '@/services/bmap-type';
+import type { SearchInputProps, SearchInputState } from './data';
 
 const { Option } = Select;
 
-type rawPOIDataType = {
-  key: React.Key;
-  name: string;
-  lng: number;  // longitude
-  lat: number;  // latitude
-}
-
-let timer: number | undefined | null;
-let currentValue: string;
-
-// 放 service
-function fetchBmapPOI(userInput: string, callback: (formerState: rawPOIDataType[]) => void) {
-  if (timer) {
-    clearTimeout(timer);
-    timer = null;
-  }
-  currentValue = userInput;
-
-  function searchCallbackHandler(results: any) {
-    // console.log(results);
-    if (currentValue === userInput) {
-      const { _pois } = results;
-      const rawPOIData: rawPOIDataType[] = [];
-      _pois.forEach((item: any) => {
-        rawPOIData.push({
-          key: item.uid,
-          name: item.title,
-          lng: item.point.lng,
-          lat: item.point.lat,
-        });
-      });
-      console.log(rawPOIData);
-      callback(rawPOIData);
-    }
-  }
-
-  function search() {
-    localSearch('北京', userInput, {
-      onSearchComplete: searchCallbackHandler,
-    });
-  }
-  timer = setTimeout(search, 100);  // 节流
-}
 
 
-// function fetch1(userInput, callback) {
-//   if (timer) {
-//     clearTimeout(timer);
-//     timer = null;
-//   }
-//   currentValue = userInput;
-
-//   function fake() {
-//     const str = querystring.encode({
-//       code: 'utf-8',
-//       q: userInput,
-//     });
-//     jsonp(`https://suggest.taobao.com/sug?${str}`)
-//       .then(response => response.json())
-//       .then(d => {
-//         console.log(d);
-//         if (currentValue === userInput) {
-//           const { result } = d;
-//           const data = [];
-//           result.forEach(r => {
-//             data.push({
-//               userInput: r[0],
-//               text: r[0],
-//             });
-//           });
-//           callback(data);
-//         }
-//       });
-//   }
-//   timer = setTimeout(fake, 300);  // 节流
-// }
-
-class SearchInput extends React.Component {
+class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
   
-  constructor(props) {
+  constructor(props: SearchInputProps) {
     super(props);
 
+    const { demand, ...recordWithoutDemand } = this.props.record;
+
     this.state = {
-      // + selected
-      remoteData: [],
-      userInputValue: undefined,
+      pointData: recordWithoutDemand,  // key name lng lat
+      searchResult: [],
     };
   }
-  
 
-  handleSearch = (userInput: string) => {
+  handleSearch = (userInput: string): void => {
     if (userInput) {
       try {
-        fetchBmapPOI(userInput, data => this.setState({ remoteData: data }));
-      } catch (e) {
-        message.error(e.message);
+        fetchBmapPOI(userInput, searchData => {
+          // console.log(searchData);
+          // 若节流后的搜索方法带回空数组作为结果（后端未返回或未找到匹配数据会返回[]），则不应更新state，因为此时有可能是由于组件 unmount 导致，若更新state会有内存泄漏
+          if (searchData.length > 0) {
+            this.setState({searchResult: searchData});
+          }
+        });
+      } catch (errInfo) {
+        console.log('Search failed:', errInfo);
       }
     } else {
-      this.setState({ remoteData: [] });
+      this.setState({ searchResult: [] });
     }
   };
 
-  // handleChange = userInput => {
-  //   this.setState({ userInput });
-  // };
+  throttledSearch = throttle(this.handleSearch, 1000, {
+    leading: false,
+    trailing: true,  // 每 1k ms 末尾才 search 1次
+  });
+
+  // 当 失焦(blur)时，select组件 unmount，取而代之为普通文本组件。 此情况下若首次被settimeout的查找地点数据方法handle search内的setstate未发生,select组件就被 unmount 了，则 handle search 方法之后的 set state 会不工作(no-op)，同时被节流的后端请求仍可能在进行，带来内存泄漏
+  componentWillUnmount() {
+    this.throttledSearch.cancel();
+  }
+
+  // 不是 user input变触发, 是选中某个 Option 后触发 onchange , option 的名字
+  handleChange = (PointName: string, optionProps: any): void => {
+    const result = [ ...this.state.searchResult ];
+    for (let index = 0; index < result.length; index += 1) {
+      const val = result[index];
+      if (val.key === optionProps.key) {
+        this.setState({ pointData: val });  // 异步
+        return;
+      }
+    }
+  }
+
+  handleBlur = async () => {
+    await this.props.saveSearchResult(this.state.pointData);
+  }
 
   render() {
-    console.log('state', this.state.remoteData);
-    const options = this.state.remoteData.map(
-      (item: rawPOIDataType) => {
-        return (
-          <Option key={item.key} value={item.name}>{item.name}</Option>
-        );
-      });
+    const options = this.state.searchResult.map((item: RawPOIDataType) => <Option key={item.key} value={item.name}>{item.name}</Option>);
 
     return (
       <Select
         showSearch
         autoFocus
-        // value={this.state.userInput}
+        value={this.state.pointData.name}
         placeholder="input search text"
         style={{ width: 200 }}
         defaultActiveFirstOption={false}
         showArrow={false}
         filterOption={false}
-        onSearch={this.handleSearch}
-        // onBlur={this.props.save}
-        // onChange={this.handleChange}
-        // notFoundContent={'notfound'}
+        onSearch={this.throttledSearch}
+        onChange={this.handleChange}
+        onBlur={this.handleBlur}
       >
         {options}
       </Select>
