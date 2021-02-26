@@ -1,17 +1,19 @@
 import type { RawPOIDataType } from '@/services/bmap-type';
 
+// https://mapopen-pub-jsapi.bj.bcebos.com/jsapi/reference/jsapi_webgl_1_0.html
 
 function localSearch(
-  defaultCity: string,
+  cityToSearch: string = '北京',
   POIName: string,
   options: BMapGL.LocalSearchOptions
 ): void {
-  const newlocalSearch = new BMapGL.LocalSearch(defaultCity, options);
+  const newlocalSearch = new BMapGL.LocalSearch(cityToSearch, options);
   newlocalSearch.search(POIName);
 }
 
 
 export function fetchBmapPOI(
+  cityToSearch: string,
   userInput: string,
   callback: (formerState: RawPOIDataType[]) => void
 ): void {
@@ -30,7 +32,8 @@ export function fetchBmapPOI(
     callback(rawPOIData);
   }
 
-  localSearch('北京', userInput, {
+  // console.log('cityToSearch:', cityToSearch);
+  localSearch(cityToSearch, userInput, {
     onSearchComplete: searchCallbackHandler,
   });
 }

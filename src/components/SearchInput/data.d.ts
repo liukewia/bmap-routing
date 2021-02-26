@@ -1,12 +1,10 @@
 import type { POIDataType } from '@/pages/VRP/data';
 
-
-
-
 export type SearchInputProps = {
   // id: string;  // dataIndex
-  saveSearchResult: (selectedRow: RawPOIDataType) => Promise<void>;
   record: POIDataType;
+  saveSearchResult: (selectedRow: RawPOIDataType) => Promise<void>;
+  priorSearchCity: { arr: ReactText[] };
   // value: string;
 }
 

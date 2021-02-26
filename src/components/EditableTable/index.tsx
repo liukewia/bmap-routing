@@ -1,15 +1,19 @@
 import React, { useContext, useState } from 'react';
-import { Table, InputNumber, Button, Form, message } from 'antd';
-// 后期删除 pro 组件
-import ProField from '@ant-design/pro-field';
+import { Table, InputNumber, Button, Form, message, Space } from 'antd';
 import ProCard from '@ant-design/pro-card';
-import type { FormInstance } from 'antd/lib/form';
+import ProField from '@ant-design/pro-field';
 import { DeleteOutlined } from '@ant-design/icons';
 import SearchInput from '@/components/SearchInput';
+import CitySelector from '@/components/CitySelector';
 import { generatePointKey } from '@/services/bmap-service';
+import { Typography } from 'antd';
 
+import type { ReactText } from 'react';
+import type { FormInstance } from 'antd/lib/form';
 import type { RawPOIDataType } from '@/services/bmap-type';
 import type { POIDataType } from '@/pages/VRP/data';
+
+const { Text } = Typography;
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -35,6 +39,7 @@ type EditableCellProps = {
   children: React.ReactNode;
   dataIndex: keyof POIDataType;
   record: POIDataType;  // 仅显示 name & demand
+  priorSearchCity: { arr: ReactText[] };
   handleSave: (record: POIDataType) => void;
 }
 
@@ -45,6 +50,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   dataIndex,
   record,
+  priorSearchCity,
   handleSave,  // Editable Table 传来的 set state 方法
   ...restProps
 }) => {
@@ -96,6 +102,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <SearchInput
             record={record}
             saveSearchResult={saveSearchResult}
+            priorSearchCity={priorSearchCity}
           />
         );
       case 'demand':
@@ -154,6 +161,8 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
 class EditableTable extends React.Component<EditableTableProps & FormPassedProps, any> {
   columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[];
+  // 变量声明在最小化的作用域内，同时修改时仅修改object的引用值，就不用作为状态刷新多个子组件
+  priorSearchCity: { arr: ReactText[] } = { arr: ['北京市'] };
 
   constructor(props: EditableTableProps & FormPassedProps) {
     
@@ -183,7 +192,9 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
     ];
   }
 
-  
+  handleDefaultCity = (newCity: ReactText[]): void => {
+    this.priorSearchCity.arr = newCity;
+  }
 
   handleDelete = (key: React.Key): void => {
     try {
@@ -243,6 +254,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
           editable: col.editable,
           dataIndex: col.dataIndex,
           title: col.title,
+          priorSearchCity: this.priorSearchCity,
           handleSave: this.handleSave,
         }),
       };
@@ -257,6 +269,13 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
         >
           Add a row
         </Button>
+        <Space style={{ float: 'right' }}>
+          <Text>优先搜索城市：</Text>
+          <CitySelector
+            priorSearchCity={this.priorSearchCity}
+            handleDefaultCity={this.handleDefaultCity}
+          />
+        </Space>
         <Table
           components={components}
           rowClassName="editable-row"
@@ -267,7 +286,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
           pagination={false}
           scroll={{ y: 300 }}  // 可观察到的y高度 单位px
         />
-        <ProCard title="表格数据" headerBordered collapsible defaultCollapsed>
+        <ProCard title="表格数据" collapsible defaultCollapsed>
           <ProField
             fieldProps={{
               style: {

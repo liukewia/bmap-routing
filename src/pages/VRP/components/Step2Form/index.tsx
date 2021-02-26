@@ -5,7 +5,7 @@ import EditableTable from "@/components/EditableTable";
 import type { POIDataType, StepAndComponentPropsType } from '../../data';
 
 
-const validatePOI = (data: POIDataType[]) => {
+const customValidation = (data: POIDataType[]) => {
   const capacity: number = data[0].demand;
   data.forEach(POI => {
     if ( POI.lng === 0 || POI.lat === 0 ) {
@@ -42,11 +42,8 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
     const POIData = JSON.parse(JSON.stringify(step2POIData));
     // const values = getFieldsValue();  // 获取不到Editable Table的值
     console.log(POIData);
-    // Wrap it with try & catch since return cannot jump out of outer function.
     try {
-      validatePOI(step2POIData);
-
-      // if having thrown no error after check, continue; else shut down. although just go back, it still will set root state, so CHECK before saving POI data.
+      customValidation(POIData);
       setRootPOIData(POIData);
       setCurrentStep('step1');
     } catch (e) {
@@ -59,7 +56,7 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
     console.log(step2POIData);
     // validate step2POIData, then setRootPOIData, and go forward.
     try {
-      validatePOI(step2POIData);
+      customValidation(step2POIData);
 
       // is going to step 3, save POI data.
       setRootPOIData(step2POIData);

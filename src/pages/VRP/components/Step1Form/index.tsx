@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Divider, Select, InputNumber, message } from 'antd';
+
 import type { StepAndComponentPropsType } from '../../data';
 import styles from './index.less';
 
@@ -21,10 +22,8 @@ const Step1Form: React.FC<StepAndComponentPropsType> = ({
 }) => {
   const { algorithm, initialTemp, finalTemp, coolingRate, chainLength } = rootAlgoData;
 
-  // VRP页面层维护一个algorithm state, step1 form 层也维护一个 temp
-  // algorithm state. 点击 下一步/上一步 后，*才*将本层的 temp state set 至 
-  // 上层。
-  const [step1AlgoData, setStep1AlgoData] = useState<string>(algorithm);
+  // VRP页面层维护一个algorithm state, step1 form 层只设一个 algo type，因为参数显示需要随 algo type 变化，具体某算法的参数无需设置为state，在切换表单进度后再 set props
+  const [step1AlgoType, setStep1AlgoType] = useState<string>(algorithm);
 
   const [form] = Form.useForm();
 
@@ -34,31 +33,35 @@ const Step1Form: React.FC<StepAndComponentPropsType> = ({
 
   // will go to step 2
   const onValidateForm = async () => {
-    const values = await form.validateFields();
-    // validate algorithm logic again before entering step 2
-    if (step1AlgoData === 'SA') {
-      if (
-        values.initialTemp <= 0 ||
-        values.finalTemp <= 0 ||
-        values.initialTemp <= values.finalTemp ||
-        values.coolingRate <= 0 ||
-        values.coolingRate >= 1 ||
-        values.chainLength <= 1
-      ) {
-        message.error(`算法的传入参数或其组合不合法！`);
+    try {
+      const values = await form.validateFields();
+      // validate algorithm logic again before entering step 2
+      if (step1AlgoType === 'SA') {
+        if (
+          values.initialTemp <= 0 ||
+          values.finalTemp <= 0 ||
+          values.initialTemp <= values.finalTemp ||
+          values.coolingRate <= 0 ||
+          values.coolingRate >= 1 ||
+          values.chainLength <= 1
+        ) {
+          message.error(`算法的传入参数或其组合不合法！`);
+          return;
+        }
+      } else {
+        message.error('选中算法没写');
         return;
       }
-    } else {
-      message.error('选中算法没写');
-      return;
+      setRootAlgoData({ ...rootAlgoData, ...values });
+      // TODO step3 计算后，可通过set TSP页面的State，传step3界面实时计算结果至father comp,再从props传给 1、3、4 child comp.
+      setCurrentStep('step2');
+    } catch (errInfo) {
+      console.log('Save failed:', errInfo);
     }
-    setRootAlgoData({ ...rootAlgoData, ...values });
-    // TODO step3 计算后，可通过set TSP页面的State，传step3界面实时计算结果至father comp,再从props传给 1、3、4 child comp.
-    setCurrentStep('step2');
   };
 
   const algorithmSelectorHandler = (value: string) => {
-    setStep1AlgoData(value);
+    setStep1AlgoType(value);
   };
 
   const renderSwitch = (algorithmChoice: string) => {
@@ -88,7 +91,7 @@ const Step1Form: React.FC<StepAndComponentPropsType> = ({
               <InputNumber
                 className={styles.numInput}
                 initialValues={finalTemp}
-                min={1e-9}
+                min={1}
                 step={1}
                 formatter={(value) => `${value}  'C`}
                 parser={(value) => (value ? value.replace("  'C", '') : finalTemp)}
@@ -160,7 +163,7 @@ const Step1Form: React.FC<StepAndComponentPropsType> = ({
           <Option value="GA">遗传算法</Option>
         </Select>
       </Form.Item>
-      {renderSwitch(step1AlgoData)}
+      {renderSwitch(step1AlgoType)}
       <Form.Item
         wrapperCol={{
           xs: { span: 24, offset: 0 },

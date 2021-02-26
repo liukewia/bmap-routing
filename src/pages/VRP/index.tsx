@@ -5,6 +5,9 @@ import Step1Form from './components/Step1Form';
 import Step2Form from './components/Step2Form';
 import StepResult from './components/StepResult';
 import BaiduMap from '@/components/BaiduMap';
+import { generatePointKey } from '@/services/bmap-service';
+
+
 import type {
   CurrentStepType,
   algorithmDataType,
@@ -21,21 +24,21 @@ const StepForm: React.FC = () => {
   const [rootAlgoData, setRootAlgoData] = useState<algorithmDataType>({
     algorithm: 'SA',
     initialTemp: 1e3,
-    finalTemp: 1e-3,
+    finalTemp: 1,
     coolingRate: 0.9,
     chainLength: 10,
   });
 
   const [rootPOIData, setRootPOIData] = useState<POIDataType[]>([
     {
-      key: 'ww1i25sk',
+      key: generatePointKey(),
       name: '四季青阳光科技园区-东1门',
       lng: 116.426549,
       lat: 39.779675,
       demand: 6,  // 每车载重量
     },
     {
-      key: 'p8lbmzcb',
+      key: generatePointKey(),
       name: '北京师范大学北院-西3门',
       lng: 116.409614,
       lat: 39.942402,

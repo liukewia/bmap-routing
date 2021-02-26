@@ -26,7 +26,12 @@ class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
   handleSearch = (userInput: string): void => {
     if (userInput) {
       try {
-        fetchBmapPOI(userInput, searchData => {
+        // 需要时再从包裹的对象中取出最新引用
+        const cityArr: string[] = this.props.priorSearchCity.arr;
+        const currentCity: string = cityArr[cityArr.length - 1];
+        // console.log(currentCity);
+        
+        fetchBmapPOI(currentCity, userInput, searchData => {
           // console.log(searchData);
           // 若节流后的搜索方法带回空数组作为结果（后端未返回或未找到匹配数据会返回[]），则不应更新state，因为此时有可能是由于组件 unmount 导致，若更新state会有内存泄漏
           if (searchData.length > 0) {
