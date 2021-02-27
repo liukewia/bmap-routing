@@ -1,4 +1,6 @@
 ﻿export default [
+  // https://github.com/ant-design/ant-design-pro/issues/8009
+  
   {
     path: '/user',
     layout: false,

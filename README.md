@@ -1,57 +1,52 @@
-# Ant Design Pro
+# an online solver to the vehicle routing problem
 
-This project is initialized with [Ant Design Pro](https://pro.ant.design). Follow is the quick guide for how to use.
+## 试用
 
-## Environment Prepare
+进入 [部署网址](https://liukewia.github.io/bmap-routing/) 后，无视有关于用户的 warning，点击上方 TSP / VRP header 进行试用。
 
-Install `node_modules`:
+## 绕过登录模块方法
 
-```bash
-npm install
+已部署的网站为绕过登录的版本。
+
+step1：
+
+注释掉 `./src/app.tsx` 中 `onPageChange` 方法，即：
+
+```js
+onPageChange: () => {
+  // const { location } = history;
+  // 如果没有登录，重定向到 login
+  // if (!initialState?.currentUser && location.pathname !== '/user/login') {
+  //   history.push('/user/login');
+  // }
+},
 ```
 
-or
+step2:
 
-```bash
-yarn
+注释掉 `./config/routes.ts` 中有关 `/user` 的路由，即：
+
+```js
+// {
+//   path: '/user',
+//   layout: false,
+//   routes: [
+//     {
+//       path: '/user',
+//       routes: [
+//         {
+//           name: 'login',
+//           path: '/user/login',
+//           component: './User/login',
+//         },
+//       ],
+//     },
+//   ],
+// },
 ```
 
-## Provided Scripts
+## 草图
 
-Ant Design Pro provides some useful script to help you quick start and build with web project, code style check and test.
+![TSP](./images/TSP-sketch.png)
 
-Scripts provided in `package.json`. It's safe to modify or add additional script:
-
-### Start project
-
-```bash
-npm start
-```
-
-### Build project
-
-```bash
-npm run build
-```
-
-### Check code style
-
-```bash
-npm run lint
-```
-
-You can also use script to auto fix some lint error:
-
-```bash
-npm run lint:fix
-```
-
-### Test code
-
-```bash
-npm test
-```
-
-## More
-
-You can view full document on our [official website](https://pro.ant.design). And welcome any feedback in our [github](https://github.com/ant-design/ant-design-pro).
+![VRP](./images/VRP-sketch.png)
