@@ -32,7 +32,7 @@ const StepForm: React.FC = () => {
   const [rootPOIData, setRootPOIData] = useState<POIDataType[]>([
     {
       key: generatePointKey(),
-      name: '四季青阳光科技园区-东1门',
+      name: '四季青阳光科技园区-东1门（配送点）',
       lng: 116.426549,
       lat: 39.779675,
       demand: 6,  // 每车载重量
@@ -43,6 +43,13 @@ const StepForm: React.FC = () => {
       lng: 116.409614,
       lat: 39.942402,
       demand: 1,
+    },
+    {
+      key: generatePointKey(),
+      name: '对外经济贸易大学-西门',
+      lng: 116.431244,
+      lat: 39.986622,
+      demand: 2,
     },
   ]);
 

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Table, InputNumber, Button, Form, message, Space } from 'antd';
+import { Table, InputNumber, Button, Form, message, Space, Tooltip } from 'antd';
 import ProCard from '@ant-design/pro-card';
 import ProField from '@ant-design/pro-field';
 import { DeleteOutlined } from '@ant-design/icons';
@@ -113,6 +113,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             onBlur={saveDemand}
             min={0}  // 但不能等于 0，由于无法设置开区间，在validate时再检查
             step={1}
+            style={{ width: '100%' }}
           />
         );
       default:
@@ -207,7 +208,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
   };
 
   handleAdd = (): void => {
-    const dataSource = [...this.props.step2POIData];
+    const dataSource = [ ...this.props.step2POIData ];
 
     const newData: POIDataType = {
       key: generatePointKey(),  // 非 bmap poi key
@@ -270,7 +271,9 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
           Add a row
         </Button>
         <Space style={{ float: 'right' }}>
+        <Tooltip title="优先是指输入地点时无需输入城市名也优先在该城市内查找，但若输入城市+地址，则尝试在全国范围内查找。">
           <Text>优先搜索城市：</Text>
+        </Tooltip>
           <CitySelector
             priorSearchCity={this.priorSearchCity}
             handleDefaultCity={this.handleDefaultCity}

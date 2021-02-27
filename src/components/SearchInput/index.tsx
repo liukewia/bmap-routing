@@ -47,7 +47,7 @@ class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
   };
 
   throttledSearch = throttle(this.handleSearch, 1000, {
-    leading: false,
+    leading: true,
     trailing: true,  // 每 1k ms 末尾才 search 1次
   });
 
@@ -81,7 +81,7 @@ class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
         autoFocus
         value={this.state.pointData.name}
         placeholder="input search text"
-        style={{ width: 200 }}
+        style={{ width: '100%' }}
         defaultActiveFirstOption={false}
         showArrow={false}
         filterOption={false}

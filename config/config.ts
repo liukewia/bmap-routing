@@ -9,7 +9,7 @@ const { REACT_APP_ENV } = process.env;
 export default defineConfig({
   // https://pro.ant.design/docs/deploy-cn
   base: '/bmap-routing/',
-  publicPath: '/bmap-routing/',
+  publicPath: process.env.NODE_ENV === 'production' ? '/bmap-routing/' : '/',
 
   hash: true,
   antd: {},

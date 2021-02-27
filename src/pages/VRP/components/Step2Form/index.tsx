@@ -1,24 +1,32 @@
 import React, { useState } from 'react';
-import { Form, Button, Divider, Space, message, Alert } from 'antd';
+import { Form, Button, Divider, Space, message, Alert, Typography } from 'antd';
 import EditableTable from "@/components/EditableTable";
 
 import type { POIDataType, StepAndComponentPropsType } from '../../data';
 
+const { Text } = Typography;
 
 const customValidation = (data: POIDataType[]) => {
   const capacity: number = data[0].demand;
-  data.forEach(POI => {
-    if ( POI.lng === 0 || POI.lat === 0 ) {
-      throw new Error(`${POI.name} 的经纬度不正确！`);
+  // 普通 for 循环的性能远远高于 forEach 的性能
+  let index;
+  for (index = 0; index < data.length; index += 1) {
+    const point = data[index];
+    if ( point.lng === 0 || point.lat === 0 ) {
+      throw new Error(`第 ${index + 1} 行的 ${point.name} 为无效地点！`);
     }
-    if ( POI.demand <= 0 ) {
-      throw new Error(`${POI.name} 的需求量不合法！`);
+    if ( point.demand <= 0 ) {
+      throw new Error(`第 ${index + 1} 行的 ${point.name} 的需求量不合法！`);
     }
-    if ( capacity < POI.demand ) {
-      throw new Error(`车辆载重量过小，不足以装载 ${POI.name} 处货物！`);
+    if ( capacity < point.demand ) {
+      throw new Error(`车辆载重量过小，不足以装载第 ${index + 1} 行的 ${point.name} 处货物！`);
     }
-  });
+  }
+  if ( index < 3 ) {
+    throw new Error(`只输入了 ${index} 处地点，计算量过少。`);
+  }
 }
+
 
 const Step2Form: React.FC<StepAndComponentPropsType> = ({
   rootPOIData,
@@ -39,12 +47,10 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
   
 
   const onPrev = () => {
-    const POIData = JSON.parse(JSON.stringify(step2POIData));
     // const values = getFieldsValue();  // 获取不到Editable Table的值
-    console.log(POIData);
     try {
-      customValidation(POIData);
-      setRootPOIData(POIData);
+      customValidation(step2POIData);
+      setRootPOIData(step2POIData);
       setCurrentStep('step1');
     } catch (e) {
       message.error(e.message);
@@ -57,8 +63,6 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
     // validate step2POIData, then setRootPOIData, and go forward.
     try {
       customValidation(step2POIData);
-
-      // is going to step 3, save POI data.
       setRootPOIData(step2POIData);
       setCurrentStep('result');
     } catch (e) {
@@ -73,7 +77,12 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
     >
       <Divider />
       <Alert
-        message="1. 点击地点可以直接在线搜索并修改；  2. 首行地点为配送点，其需求量为每辆车的载重；其余行地点为需求点。  3.配送至需求点的车辆数不需要设置，由计算得出结果。"
+        message={
+          <Space direction="vertical">
+            <Text>1. 点击地点可以直接在线搜索并修改；</Text>
+            <Text>2. 首行地点为配送点，其需求量为每辆车的载重；其余行地点为需求点。</Text>
+            <Text>3.配送至需求点的车辆数不需要设置，由计算得出结果。</Text>
+          </Space>}
         type="info"
         showIcon
         closable
