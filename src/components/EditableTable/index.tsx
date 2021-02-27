@@ -271,7 +271,7 @@ class EditableTable extends React.Component<EditableTableProps & FormPassedProps
           Add a row
         </Button>
         <Space style={{ float: 'right' }}>
-        <Tooltip title="优先是指输入地点时无需输入城市名也优先在该城市内查找，但若输入城市+地址，则尝试在全国范围内查找。">
+        <Tooltip title="优先是指输入地点时无需输入城市名也优先在该城市内查找。但若输入城市+地址，则尝试在全国范围内查找。">
           <Text>优先搜索城市：</Text>
         </Tooltip>
           <CitySelector

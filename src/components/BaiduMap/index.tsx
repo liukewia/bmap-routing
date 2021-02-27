@@ -9,7 +9,7 @@ const BaiduMap = () => {
 
   return (
     <Map
-      style={{ height: 500 }}
+      style={{ height: 700 }}
       center={new BMapGL.Point(116.4, 39.91)}
       zoom={11}
       // enableDragging={true}

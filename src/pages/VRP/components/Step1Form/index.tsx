@@ -15,7 +15,7 @@ const formItemLayout = {
   },
 };
 
-const Step1Form: React.FC<StepAndComponentPropsType> = ({
+const Step1Form: React.FC<any> = ({
   rootAlgoData,
   setRootAlgoData,
   setCurrentStep

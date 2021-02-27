@@ -28,7 +28,7 @@ const customValidation = (data: POIDataType[]) => {
 }
 
 
-const Step2Form: React.FC<StepAndComponentPropsType> = ({
+const Step2Form: React.FC<any> = ({
   rootPOIData,
   setRootPOIData,
   setCurrentStep
@@ -57,9 +57,8 @@ const Step2Form: React.FC<StepAndComponentPropsType> = ({
     }
   };
 
-  const onNext = async () => {
+  const onNext = () => {
     // const values = await validateFields();
-    console.log(step2POIData);
     // validate step2POIData, then setRootPOIData, and go forward.
     try {
       customValidation(step2POIData);

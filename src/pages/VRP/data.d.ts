@@ -26,3 +26,5 @@ export type StepAndComponentPropsType = {
   rootPOIData: POIDataType[];
   setRootPOIData: React.Dispatch<React.SetStateAction<POIDataType[]>>;
 };
+
+export type CalcStatusType =  0 | 1 | 2;
