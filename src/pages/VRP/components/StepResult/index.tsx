@@ -50,7 +50,7 @@ const Step3: React.FC<any> = (props) => {
       <ProCard
         title="表单数据"
         collapsible
-        defaultCollapsed={false}
+        defaultCollapsed
         style={{ width: '100%' }
       }
       >

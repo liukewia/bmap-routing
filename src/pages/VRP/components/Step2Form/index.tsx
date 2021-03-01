@@ -7,10 +7,14 @@ import type { POIDataType, StepAndComponentPropsType } from '../../data';
 const { Text } = Typography;
 
 const customValidation = (data: POIDataType[]) => {
+  const len = data.length;
+  if ( len < 3 ) {
+    throw new Error(`只输入了 ${len} 处地点，计算量过少。`);
+  }
+
   const capacity: number = data[0].demand;
   // 普通 for 循环的性能远远高于 forEach 的性能
-  let index;
-  for (index = 0; index < data.length; index += 1) {
+  for (let index = 0; index < len; index += 1) {
     const point = data[index];
     if ( point.lng === 0 || point.lat === 0 ) {
       throw new Error(`第 ${index + 1} 行的 ${point.name} 为无效地点！`);
@@ -21,9 +25,6 @@ const customValidation = (data: POIDataType[]) => {
     if ( capacity < point.demand ) {
       throw new Error(`车辆载重量过小，不足以装载第 ${index + 1} 行的 ${point.name} 处货物！`);
     }
-  }
-  if ( index < 3 ) {
-    throw new Error(`只输入了 ${index} 处地点，计算量过少。`);
   }
 }
 
@@ -80,7 +81,7 @@ const Step2Form: React.FC<any> = ({
           <Space direction="vertical">
             <Text>1. 点击地点可以直接在线搜索并修改；</Text>
             <Text>2. 首行地点为配送点，其需求量为每辆车的载重；其余行地点为需求点。</Text>
-            <Text>3.配送至需求点的车辆数不需要设置，由计算得出结果。</Text>
+            <Text>3. 配送至需求点的车辆数不需要设置，由计算得出结果。</Text>
           </Space>}
         type="info"
         showIcon

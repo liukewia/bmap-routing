@@ -85,7 +85,7 @@ const StepForm: React.FC = () => {
       case 1:
         return (
           <Card>
-            <h4>计算结果：</h4>
+            <h3>计算结果：</h3>
             <Skeleton active />
           </Card>
         );
