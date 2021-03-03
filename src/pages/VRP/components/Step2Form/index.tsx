@@ -94,10 +94,8 @@ const Step2Form: React.FC<any> = ({
           setStep2POIData={setStep2POIData}
         />
       </Form.Item>
-      <Form.Item>
+      <Form.Item style={{ width: 200, margin: '0 auto' }}>
         <Space
-          // TODO 居中
-          style={{ marginLeft: '150px' }}
           size='large'
         >
           <Button onClick={onPrev}>

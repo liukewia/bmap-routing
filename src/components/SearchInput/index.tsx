@@ -1,6 +1,6 @@
 import React from 'react';
 import { Select } from 'antd';
-import { throttle } from 'lodash';
+import { debounce } from 'lodash';
 import { fetchBmapPOI } from '@/services/bmap-service';
 
 import type { RawPOIDataType } from '@/services/bmap-type';
@@ -46,14 +46,14 @@ class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
     }
   };
 
-  throttledSearch = throttle(this.handleSearch, 1000, {
-    leading: true,
+  debouncedSearch = debounce(this.handleSearch, 800, {
+    leading: false,
     trailing: true,  // 每 1k ms 末尾才 search 1次
   });
 
   // 当 失焦(blur)时，select组件 unmount，取而代之为普通文本组件。 此情况下若首次被settimeout的查找地点数据方法handle search内的setstate未发生,select组件就被 unmount 了，则 handle search 方法之后的 set state 会不工作(no-op)，同时被节流的后端请求仍可能在进行，带来内存泄漏
   componentWillUnmount() {
-    this.throttledSearch.cancel();
+    this.debouncedSearch.cancel();
   }
 
   // 不是 user input变触发, 是选中某个 Option 后触发 onchange , option 的名字
@@ -85,7 +85,7 @@ class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
         defaultActiveFirstOption={false}
         showArrow={false}
         filterOption={false}
-        onSearch={this.throttledSearch}
+        onSearch={this.debouncedSearch}
         onChange={this.handleChange}
         onBlur={this.handleBlur}
       >
