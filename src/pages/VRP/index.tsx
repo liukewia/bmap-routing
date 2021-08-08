@@ -157,7 +157,7 @@ const StepForm: React.FC = () => {
           <PageHeaderWrapper content="求解多车辆路径问题 (VRP)" />
         </Col>
       </Row>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} style={{ marginTop: 20 }}>
         <Col span={12}>
           <Card>
             <Steps size="small" current={step} className={styles.steps}>

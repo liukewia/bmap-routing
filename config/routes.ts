@@ -19,9 +19,7 @@
   },
   {
     path: '/welcome',
-    name: '欢迎',
-    icon: 'smile',
-    component: './Welcome',
+    redirect: '/VRP',
   },
   {
     path: '/',

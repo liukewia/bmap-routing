@@ -7,19 +7,11 @@ import styles from './index.less';
 const { Option } = Select;
 
 const formItemLayout = {
-  labelCol: {
-    span: 8,
-  },
-  wrapperCol: {
-    span: 12,
-  },
+  labelCol: { span: 8 },
+  wrapperCol: { xxl: { span: 4 }, xl: { span: 8 }, lg: { span: 8 }, md: { span: 16 }, sm: { span: 24 }, xs: { span: 24 } },
 };
 
-const Step1Form: React.FC<any> = ({
-  rootAlgoData,
-  setRootAlgoData,
-  setCurrentStep
-}) => {
+const Step1Form: React.FC<any> = ({ rootAlgoData, setRootAlgoData, setCurrentStep }) => {
   const { algorithm, initialTemp, finalTemp, coolingRate, chainLength } = rootAlgoData;
 
   // VRP页面层维护一个algorithm state, step1 form 层只设一个 algo type，因为参数显示需要随 algo type 变化，具体某算法的参数无需设置为state，在切换表单进度后再 set props
@@ -127,15 +119,8 @@ const Step1Form: React.FC<any> = ({
         );
       case 'GA':
         return (
-          <Form.Item
-            label="演示"
-            name="param"
-            rules={[{ required: true, message: '请输入' }]}
-          >
-            <InputNumber
-                className={styles.numInput}
-                initialValues={1}
-            />
+          <Form.Item label="演示" name="param" rules={[{ required: true, message: '请输入' }]}>
+            <InputNumber className={styles.numInput} initialValues={1} />
           </Form.Item>
         );
       default:

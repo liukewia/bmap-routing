@@ -54,7 +54,12 @@ const Login: React.FC = () => {
     setSubmitting(true);
     try {
       // 登录
-      const msg = await fakeAccountLogin({ ...values, type });
+      // const msg = await fakeAccountLogin({ ...values, type });
+      const msg = {
+        status: 'ok',
+        type: 'account',
+        currentAuthority: 'admin',
+      };
       if (msg.status === 'ok') {
         message.success('登录成功！');
         await fetchUserInfo();
@@ -86,6 +91,8 @@ const Login: React.FC = () => {
         <div className={styles.main}>
           <ProForm
             initialValues={{
+              username: 'root',
+              password: 'admin',
               autoLogin: true,
             }}
             submitter={{
@@ -121,7 +128,7 @@ const Login: React.FC = () => {
                     size: 'large',
                     prefix: <UserOutlined className={styles.prefixIcon} />,
                   }}
-                  placeholder="用户名: admin or user"
+                  placeholder="root"
                   rules={[
                     {
                       required: true,
@@ -135,7 +142,7 @@ const Login: React.FC = () => {
                     size: 'large',
                     prefix: <LockTwoTone className={styles.prefixIcon} />,
                   }}
-                  placeholder="密码: root"
+                  placeholder="admin"
                   rules={[
                     {
                       required: true,
